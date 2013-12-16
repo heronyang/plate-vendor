@@ -7,11 +7,15 @@
 
     <!-- tab -->
     <string name="tab_cooking">正在煮</string>
-    <string name="tab_finish">煮好的:w</string>
+    <string name="tab_finish">煮好的</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="cancel">不要</string>
     <string name="ok">完成</string>
     <string name="confirm_finish_warning_message">餐點已經製作完成，即刻通知使用者領取</string>
     <string name="confirm_finish_warning_title">請確認</string>
 
+    <!-- for login session -->
+    <string name="ask_login_title">請登入</string>
+    <string name="ask_login_message">請選擇欲登入商家</string>
+    <string name="select_login_vendor">選擇登入商家名稱</string>
 </resources>

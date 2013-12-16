@@ -14,11 +14,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="New Text"
-            android:id="@+id/tv_listrow_cooking"
+            android:id="@+id/tv_listrow_finish"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
-
-        <!-- android:textSize="@dimen/box_textsize" -->
     </RelativeLayout>
 
 </LinearLayout>

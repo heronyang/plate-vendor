@@ -1,6 +1,10 @@
 package tw.plate.vendor;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
@@ -9,13 +13,24 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, PlateOrderManager.PlateOrderManagerCallback {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -23,6 +38,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    public static PlateOrderManager plateOrderManager;
 
     //================================================================================
     // Layout Setup
@@ -59,16 +75,57 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
             //int[] tabsResources= new int[]{R.drawable.tab_location_trans,R.drawable.tab_bill_trans};
+
+            String text = "";
+            if (i==0)   text = getString(R.string.tab_cooking);
+            else if (i==1)   text = getString(R.string.tab_finish);
+
             actionBar.addTab(
                     actionBar.newTab()
                             .setTabListener(this)
-                            .setText("test")
+                            .setText(text)
                     //.setText(mSectionsPagerAdapter.getPageTitle(i))
                     //.setIcon(getResources().getDrawable(tabsResources[i]))
             );
         }
     }
 
+
+    // ======= UI Stuff =======
+    private void vendorList() {
+        // FIXME: should download available list from server
+        CharSequence vendorList[] = new CharSequence[] {"v1", "v2", "v3", "v4"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("選擇登入商家");
+        builder.setItems(vendorList, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // which
+            }
+        });
+        builder.show();
+    }
+
+    private void popupMessage(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle(title);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    // ======= UI Stuff ======= END
+
+    private void setupCookie() {
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
+    }
 
     //================================================================================
     // Runtime Override Events
@@ -78,7 +135,29 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // setup system-wide cookie
+        setupCookie();
+
+        // login, and first update
+        plateOrderManager = new PlateOrderManager(this);
+        plateOrderManager.login(this);
+
+        //
         layout_setup();
+
+        // regular refresh
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                refreshData();
+            }
+        }, 0, Constants.REFRESH_INT);
+    }
+
+    private void refreshData() {
+        Log.d(Constants.LOG_TAG, "Main: refresh");
+        plateOrderManager.update(this);
     }
 
     @Override
@@ -194,6 +273,36 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             return rootView;
         }
     }
+
+
+    // Plate Order Manager Callbacks
+    @Override
+    public void orderUpdated() {
+        Log.d(Constants.LOG_TAG, "order updated");
+
+        FragmentManager fm = getSupportFragmentManager();
+        String tag;
+
+        tag = makeFragmentName(R.id.pager, 0);
+        CookingFragment cookingFragment = (CookingFragment)fm.findFragmentByTag(tag);
+        cookingFragment.cookingListUpdate();
+
+        tag = makeFragmentName(R.id.pager, 1);
+        FinishFragment finishFragment = (FinishFragment)fm.findFragmentByTag(tag);
+        finishFragment.finishListUpdate();
+    }
+
+    @Override
+    public void loginCompleted() {
+        Log.d(Constants.LOG_TAG, "login completed");
+        plateOrderManager.update(this);
+    }
+
+    //
+    private static String makeFragmentName(int viewId, int index) {
+        return "android:switcher:" + viewId + ":" + index;
+    }
+
 
     //================================================================================
     // End

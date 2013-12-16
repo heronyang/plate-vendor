@@ -20,12 +20,25 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 public class CookingFragment extends Fragment {
 
     private View v;
     private ListViewCustomAdapter listViewCustomAdapter;
     private GridViewCustomAdapter gridviewCustomAdapter;
 
+    List<PlateVendorService.OrderSingle> orders;
+    List<PlateVendorService.OrderSingle> orders_cooking;
+
+    //================================================================================
+    // Adapters
+    //================================================================================
     private class ListViewCustomAdapter extends BaseAdapter {
         LayoutInflater inflater;
 
@@ -41,7 +54,8 @@ public class CookingFragment extends Fragment {
             return false;
         }
         public int getCount(){
-            return 15;
+            if (orders_cooking == null || orders_cooking.isEmpty())  return 0;
+            return orders_cooking.size();
         }
         public Object getItem(int position){
             return "test";
@@ -90,8 +104,22 @@ public class CookingFragment extends Fragment {
                 viewHolder=(ViewHolder)convertview.getTag();
             }
             // set values
-            //
-            viewHolder.tv_listrow_cooking.setText("test" + arg0);
+            String output = "";
+            PlateVendorService.OrderV1 o = orders_cooking.get(arg0).order;
+            output += ("time : " + o.mtime + "\n");
+            output += ("ns : " + o.pos_slip_number + "\n");
+            output += ("ph : " + orders_cooking.get(arg0).user.username + "\n");
+
+            List<PlateVendorService.OrderItemV1> order_items = orders_cooking.get(arg0).order_items;
+            int totalPrice = 0;
+            for (PlateVendorService.OrderItemV1 oi : order_items) {
+                output += oi.meal.meal_name + " * " + oi.amount + "\n";
+                totalPrice += oi.meal.meal_price * oi.amount;
+            }
+            output += "total : " + totalPrice;
+
+
+            viewHolder.tv_listrow_cooking.setText(output);
 
             return convertview;
         }
@@ -113,7 +141,8 @@ public class CookingFragment extends Fragment {
             return false;
         }
         public int getCount(){
-            return 200;
+            if (orders_cooking == null || orders_cooking.isEmpty())  return 0;
+            return orders_cooking.size();
         }
         public Object getItem(int position){
             return "test";
@@ -133,26 +162,7 @@ public class CookingFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                        builder.setMessage(R.string.confirm_finish_warning_message)
-                                .setTitle(R.string.confirm_finish_warning_title);
-
-                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK button
-                                Log.d(Constants.LOG_TAG, "send request to server here");
-                            }
-                        });
-
-                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // If cancel, do nothing
-                            }
-                        });
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                        //
                     }
                 });
 
@@ -161,23 +171,48 @@ public class CookingFragment extends Fragment {
             else {
                 viewHolder=(ViewHolder)convertview.getTag();
             }
+
             // set values
-            //
-            viewHolder.tv_listrow_cooking.setText("p" + arg0);
+            int ns = orders_cooking.get(arg0).order.pos_slip_number;
+            viewHolder.tv_listrow_cooking.setText("p" + ns);
 
             return convertview;
         }
 
     }
 
-    public static CookingFragment newInstance(String param1, String param2) {
-        CookingFragment fragment = new CookingFragment();
-        return fragment;
-    }
-    public CookingFragment() {
-        // Required empty public constructor
+
+    //================================================================================
+    // Layout Updates
+    //================================================================================
+    public void cookingListUpdate() {
+        // should wait for the data is grabbed
+        Log.d(Constants.LOG_TAG, "Cooking: cooking list update start");
+        PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+        orders = plateOrderManager.orders;
+
+        orders_cooking = new ArrayList<PlateVendorService.OrderSingle>();
+        for (PlateVendorService.OrderSingle os : orders) {
+            if (os.order.status == Constants.ORDER_STATE.ORDER_STATUS_INIT_COOKING.ordinal()) {
+                orders_cooking.add(os);
+            }
+        }
+        listViewUpdate();
+        gridViewUpdate();
     }
 
+    public void listViewUpdate() {
+        listViewCustomAdapter.notifyDataSetChanged();
+    }
+
+    public void gridViewUpdate() {
+        gridviewCustomAdapter.notifyDataSetChanged();
+    }
+
+
+    //================================================================================
+    // Overrides
+    //================================================================================
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -210,8 +245,20 @@ public class CookingFragment extends Fragment {
         super.onDetach();
     }
 
+    //================================================================================
+    // Constructor
+    //================================================================================
     public static CookingFragment newInstance() {
         CookingFragment cookingFragment = new CookingFragment();
         return cookingFragment;
+    }
+
+    public static CookingFragment newInstance(String param1, String param2) {
+        CookingFragment fragment = new CookingFragment();
+        return fragment;
+    }
+
+    public CookingFragment() {
+        // Required empty public constructor
     }
 }

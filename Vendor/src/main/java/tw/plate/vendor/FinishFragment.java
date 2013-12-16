@@ -68,26 +68,11 @@ public class FinishFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                        builder.setMessage(R.string.confirm_finish_warning_message)
-                                .setTitle(R.string.confirm_finish_warning_title);
-
-                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK button
-                                Log.d(Constants.LOG_TAG, "send request to server here");
-                            }
-                        });
-
-                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // If cancel, do nothing
-                            }
-                        });
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                        // pick order
+                        int order_key = orders_finish.get(arg0).order.id;
+                        Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
+                        PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                        plateOrderManager.pick(order_key, getActivity());
                     }
                 });
 

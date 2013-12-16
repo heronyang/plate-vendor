@@ -107,18 +107,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         builder.show();
     }
 
-    private void popupMessage(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
-                .setTitle(title);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            }
-        });
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
     // ======= UI Stuff ======= END
 
     private void setupCookie() {

@@ -1,7 +1,9 @@
 package tw.plate.vendor;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -106,4 +108,50 @@ public class PlateOrderManager{
     }
 
 
+    public void finish(int order_key, final Activity activity) {
+        plateTWV1.finish(order_key, new Callback<Response>() {
+            @Override
+            public void success(Response r, Response response) {
+                Log.d(Constants.LOG_TAG, "Finish: Success!");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(Constants.LOG_TAG, "Finish: Error : " + error.getMessage());
+                String title = activity.getString(R.string.popup_network_error_title);
+                String message = activity.getString(R.string.popup_network_error_message);
+                popupMessage(title, message, activity);
+            }
+        });
+    }
+
+    public void pick(int order_key, final Activity activity) {
+        plateTWV1.pick(order_key, new Callback<Response>() {
+            @Override
+            public void success(Response r, Response response) {
+                Log.d(Constants.LOG_TAG, "Finish: Success!");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(Constants.LOG_TAG, "Finish: Error : " + error.getMessage());
+                String title = activity.getString(R.string.popup_network_error_title);
+                String message = activity.getString(R.string.popup_network_error_message);
+                popupMessage(title, message, activity);
+            }
+        });
+    }
+
+    private void popupMessage(String title, String message, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(message)
+                .setTitle(title);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }

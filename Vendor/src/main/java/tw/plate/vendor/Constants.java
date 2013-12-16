@@ -30,5 +30,5 @@ final public class Constants {
         ORDER_STATUS_RESCUED
     }
 
-    public static int REFRESH_INT = 2000;
+    public static int REFRESH_INT = 1000;
 }

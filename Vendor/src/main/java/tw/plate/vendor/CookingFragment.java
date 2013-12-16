@@ -36,6 +36,7 @@ public class CookingFragment extends Fragment {
     List<PlateVendorService.OrderSingle> orders;
     List<PlateVendorService.OrderSingle> orders_cooking;
 
+
     //================================================================================
     // Adapters
     //================================================================================
@@ -74,27 +75,13 @@ public class CookingFragment extends Fragment {
                 convertview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.d(Constants.LOG_TAG, "clicked");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        Log.d(Constants.LOG_TAG, "send request to server here");
 
-                        builder.setMessage(R.string.confirm_finish_warning_message)
-                                .setTitle(R.string.confirm_finish_warning_title);
-
-                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK button
-                                Log.d(Constants.LOG_TAG, "send request to server here");
-                            }
-                        });
-
-                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // If cancel, do nothing
-                            }
-                        });
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                        // finishOrder
+                        int order_key = orders_cooking.get(arg0).order.id;
+                        Log.d(Constants.LOG_TAG, "finishing order id >> " + order_key);
+                        PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                        plateOrderManager.finish(order_key, getActivity());
                     }
                 });
 
@@ -180,7 +167,6 @@ public class CookingFragment extends Fragment {
         }
 
     }
-
 
     //================================================================================
     // Layout Updates

@@ -18,4 +18,8 @@
     <string name="ask_login_title">請登入</string>
     <string name="ask_login_message">請選擇欲登入商家</string>
     <string name="select_login_vendor">選擇登入商家名稱</string>
+
+    <!-- for failure popups -->
+    <string name="popup_network_error_title">檢查網路</string>
+    <string name="popup_network_error_message">網路傳送資料出現問題，請檢查或找尋技術人員</string>
 </resources>

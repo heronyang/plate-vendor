@@ -85,6 +85,16 @@ public class PlateVendorService {
 
         @POST("/1/order_vendor")
         void order_vendor(Callback<OrderVendorResponse> cb);
+
+        @FormUrlEncoded
+        @POST("/1/finish")
+        void finish(@Field("order_key") int order_key,
+                    Callback<Response> cb);
+
+        @FormUrlEncoded
+        @POST("/1/pick")
+        void pick(@Field("order_key") int order_key,
+                    Callback<Response> cb);
     }
 
     private static RestAdapter restAdapterV1;

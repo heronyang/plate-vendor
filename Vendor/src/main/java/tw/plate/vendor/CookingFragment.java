@@ -169,7 +169,7 @@ public class CookingFragment extends Fragment {
 
             // set values
             int ns = orders_cooking.get(arg0).order.pos_slip_number;
-            viewHolder.tv_number_slip.setText("p" + ns);
+            viewHolder.tv_number_slip.setText("" + ns);
 
             return convertview;
         }

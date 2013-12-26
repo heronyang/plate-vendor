@@ -141,9 +141,10 @@ public class FinishFragment extends Fragment {
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
                         //
+                        PlateVendorService.OrderSingle orderSingle = orders_finish.get(arg0);
                         int order_key = orders_finish.get(arg0).order.id;
                         Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key + ", arg0 >>" + arg0);
-                        doubleConfirmPick(order_key, getActivity());
+                        doubleConfirmPick(order_key, orderSingle, getActivity());
                     }
                 });
 
@@ -245,10 +246,20 @@ public class FinishFragment extends Fragment {
     //================================================================================
     // Tool Function
     //================================================================================
-    private void doubleConfirmPick(final int order_key, Activity activity) {
+    private void doubleConfirmPick(final int order_key, PlateVendorService.OrderSingle orderSingle, Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(getString(R.string.double_confirm_pick_message))
-                .setTitle(getString(R.string.double_confirm_pick_title));
+
+        String order_content;
+        order_content = "電話號碼：" + orderSingle.user.username + "\n\n";
+        int totalPrice = 0;
+        for (PlateVendorService.OrderItemV1 oi : orderSingle.order_items) {
+            order_content += oi.meal.meal_name + " * " + oi.amount + "\n";
+            totalPrice += (oi.meal.meal_price * oi.amount);
+        }
+        order_content += "\n總計：" + totalPrice + "NTD\n";
+
+        builder.setMessage(getString(R.string.double_confirm_pick_message) + "\n" + order_content)
+                .setTitle("號碼牌" + orderSingle.order.pos_slip_number + " : " + getString(R.string.double_confirm_pick_title));
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);

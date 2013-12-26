@@ -6,7 +6,10 @@
     <GridView
         android:id="@+id/gv_cooking"
         android:numColumns="5"
-        android:layout_width="300dip"
+        android:horizontalSpacing="10dp"
+        android:verticalSpacing="10dp"
+        android:padding="5dp"
+        android:layout_width="400dp"
         android:layout_height="match_parent" />
     <ListView
         android:id="@+id/lv_cooking"

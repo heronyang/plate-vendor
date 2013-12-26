@@ -8,9 +8,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="tv_listrow_cooking"
         android:gravity="center"
         android:id="@+id/tv_listrow_cooking"
-        android:layout_toLeftOf="@+id/cancel_order_button" />
+        android:layout_below="@+id/tv_slip_number"
+        android:layout_toRightOf="@+id/tv_slip_number" />
 
     <Button
         android:layout_width="wrap_content"
@@ -18,17 +20,43 @@
         android:id="@+id/cancel_order_button"
         android:text="@string/cancel_order_button"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/finish_order_button" />
+        android:layout_alignParentRight="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/finish_order_button"
         android:text="@string/finish_order_button"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/cancel_order_button"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_marginTop="54dp" />
 
-        <!-- android:textSize="@dimen/box_textsize" -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Number"
+        android:id="@+id/tv_slip_number"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_above="@+id/finish_order_button" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="tv_phone"
+        android:id="@+id/tv_phone"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/tv_slip_number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="tv_total_price"
+        android:id="@+id/tv_total_price"
+        android:layout_below="@+id/tv_listrow_cooking"
+        android:layout_alignLeft="@+id/finish_order_button" />
+
+    <!-- android:textSize="@dimen/box_textsize" -->
 
 </RelativeLayout>

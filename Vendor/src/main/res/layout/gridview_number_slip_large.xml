@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="100sp"
-        android:background="@drawable/circle"
+        android:background="@drawable/circle_01"
         android:id="@+id/tv_number_slip_large" />
 
 </LinearLayout>

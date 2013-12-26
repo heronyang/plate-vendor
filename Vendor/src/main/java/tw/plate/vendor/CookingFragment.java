@@ -45,6 +45,10 @@ public class CookingFragment extends Fragment {
 
         public class ViewHolder{
             TextView tv_listrow_cooking;
+            TextView tv_slip_number;
+            TextView tv_phone;
+            TextView tv_totalPrice;
+
         }
         public ListViewCustomAdapter(Context context){
             inflater = LayoutInflater.from(context);
@@ -71,6 +75,9 @@ public class CookingFragment extends Fragment {
 
                 viewHolder=new ViewHolder();
                 viewHolder.tv_listrow_cooking = (TextView) convertview.findViewById(R.id.tv_listrow_cooking);
+                viewHolder.tv_slip_number = (TextView) convertview.findViewById(R.id.tv_slip_number);
+                viewHolder.tv_phone = (TextView) convertview.findViewById(R.id.tv_phone);
+                viewHolder.tv_totalPrice = (TextView) convertview.findViewById(R.id.tv_total_price);
 
                 Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
                 Button bt_finish = (Button)convertview.findViewById(R.id.finish_order_button);
@@ -101,9 +108,8 @@ public class CookingFragment extends Fragment {
             // set values
             String output = "";
             PlateVendorService.OrderV1 o = orders_cooking.get(arg0).order;
-            output += ("time : " + o.mtime + "\n");
-            output += ("ns : " + o.pos_slip_number + "\n");
-            output += ("ph : " + orders_cooking.get(arg0).user.username + "\n");
+            //output += ("time : " + o.mtime + "\n");
+            //output += ("ph : " + orders_cooking.get(arg0).user.username + "\n");
 
             List<PlateVendorService.OrderItemV1> order_items = orders_cooking.get(arg0).order_items;
             int totalPrice = 0;
@@ -111,9 +117,11 @@ public class CookingFragment extends Fragment {
                 output += oi.meal.meal_name + " * " + oi.amount + "\n";
                 totalPrice += oi.meal.meal_price * oi.amount;
             }
-            output += "total : " + totalPrice;
+            //output += "total : " + totalPrice;
 
-
+            viewHolder.tv_totalPrice.setText(totalPrice+"");
+            viewHolder.tv_phone.setText(orders_cooking.get(arg0).user.username +"");
+            viewHolder.tv_slip_number.setText(o.pos_slip_number+"");
             viewHolder.tv_listrow_cooking.setText(output);
 
             return convertview;

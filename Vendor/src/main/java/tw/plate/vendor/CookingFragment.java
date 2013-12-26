@@ -119,7 +119,7 @@ public class CookingFragment extends Fragment {
             }
             //output += "total : " + totalPrice;
 
-            viewHolder.tv_totalPrice.setText(totalPrice+"");
+            viewHolder.tv_totalPrice.setText(totalPrice+" 元");
             viewHolder.tv_phone.setText(orders_cooking.get(arg0).user.username +"");
             viewHolder.tv_slip_number.setText(o.pos_slip_number+"");
             viewHolder.tv_listrow_cooking.setText(output);

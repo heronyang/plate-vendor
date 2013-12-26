@@ -1,15 +1,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="tw.plate.vendor.FinishFragment">
-<GridView
-    android:id="@+id/gv_finish"
-    android:numColumns="5"
-    android:layout_width="300dip"
-    android:layout_height="match_parent" />
-<ListView
-    android:id="@+id/lv_finish"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="tw.plate.vendor.FinishFragment">
+    <GridView
+        android:id="@+id/gv_finish"
+        android:numColumns="5"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent" />
+    <ListView
+        android:id="@+id/lv_finish"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

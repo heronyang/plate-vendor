@@ -108,7 +108,7 @@ public class FinishFragment extends Fragment {
         LayoutInflater inflater;
 
         public class ViewHolder{
-            TextView tv_listrow_finish;
+            TextView tv_number_slip_large;
         }
         public GridViewCustomAdapter(Context context){
             inflater = LayoutInflater.from(context);
@@ -131,16 +131,19 @@ public class FinishFragment extends Fragment {
         public View getView(final int arg0, View convertview, ViewGroup arg2) {
             ViewHolder viewHolder = null;
             if(convertview == null) {
-                convertview = inflater.inflate(R.layout.listrow_finish, null);
+                convertview = inflater.inflate(R.layout.gridview_number_slip_large, null);
 
                 viewHolder=new ViewHolder();
-                viewHolder.tv_listrow_finish = (TextView) convertview.findViewById(R.id.tv_listrow_finish);
+                viewHolder.tv_number_slip_large = (TextView) convertview.findViewById(R.id.tv_number_slip_large);
 
                 convertview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
                         //
+                        int order_key = orders_finish.get(arg0).order.id;
+                        Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
+                        doubleConfirmPick(order_key, getActivity());
                     }
                 });
 
@@ -152,7 +155,7 @@ public class FinishFragment extends Fragment {
 
             // set values
             int ns = orders_finish.get(arg0).order.pos_slip_number;
-            viewHolder.tv_listrow_finish.setText("p" + ns);
+            viewHolder.tv_number_slip_large.setText(""+ns);
 
             return convertview;
         }
@@ -238,4 +241,28 @@ public class FinishFragment extends Fragment {
         // Required empty public constructor
     }
 
+
+    //================================================================================
+    // Tool Function
+    //================================================================================
+    private void doubleConfirmPick(final int order_key, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(getString(R.string.double_confirm_pick_message))
+                .setTitle(getString(R.string.double_confirm_pick_title));
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
+                PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                plateOrderManager.pick(order_key, getActivity());
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // If cancel, do nothing
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }

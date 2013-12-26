@@ -76,6 +76,10 @@ public class PlateVendorService {
         public User user;
     }
 
+    public class VendorListResponse {
+        public List<String> vendor_usernames;
+    }
+
     interface PlateTWAPI1 {
         @FormUrlEncoded
         @POST("/1/login")
@@ -95,6 +99,14 @@ public class PlateVendorService {
         @POST("/1/pick")
         void pick(@Field("order_key") int order_key,
                     Callback<Response> cb);
+
+        @FormUrlEncoded
+        @POST("/1/cancel")
+        void cancel(@Field("order_key") int order_key,
+                    Callback<Response> cb);
+
+        @GET("/1/vendor_list")
+        void vendor_list(Callback<VendorListResponse> cb);
     }
 
     private static RestAdapter restAdapterV1;

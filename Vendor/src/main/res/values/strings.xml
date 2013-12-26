@@ -9,8 +9,8 @@
     <string name="tab_cooking">正在煮</string>
     <string name="tab_finish">煮好的</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="cancel">不要</string>
-    <string name="ok">完成</string>
+    <string name="cancel">返回</string>
+    <string name="ok">確認</string>
     <string name="confirm_finish_warning_message">餐點已經製作完成，即刻通知使用者領取</string>
     <string name="confirm_finish_warning_title">請確認</string>
 
@@ -22,4 +22,17 @@
     <!-- for failure popups -->
     <string name="popup_network_error_title">檢查網路</string>
     <string name="popup_network_error_message">網路傳送資料出現問題，請檢查或找尋技術人員</string>
+
+    <!-- setting popup -->
+    <string name="select_vendor_username">選擇登入的機器名稱</string>
+    <string name="cancel_order_button">拒絕訂單</string>
+    <string name="finish_order_button">完成</string>
+
+    <!-- double confirm popups -->
+    <string name="double_confirm_cancel_title">取消訂單</string>
+    <string name="double_confirm_cancel_message">因製作上遇到困難無法完成訂單，將通知使用者訂單已被取消</string>
+    <string name="double_confirm_finish_title">餐點完成</string>
+    <string name="double_confirm_finish_message">通知該使用者到現場領餐</string>
+    <string name="double_confirm_pick_title">領餐</string>
+    <string name="double_confirm_pick_message">使用者到現場並領餐，將完成該筆交易</string>
 </resources>

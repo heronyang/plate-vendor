@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,7 +36,6 @@ public class CookingFragment extends Fragment {
 
     List<PlateVendorService.OrderSingle> orders;
     List<PlateVendorService.OrderSingle> orders_cooking;
-
 
     //================================================================================
     // Adapters
@@ -72,16 +72,24 @@ public class CookingFragment extends Fragment {
                 viewHolder=new ViewHolder();
                 viewHolder.tv_listrow_cooking = (TextView) convertview.findViewById(R.id.tv_listrow_cooking);
 
-                convertview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Log.d(Constants.LOG_TAG, "send request to server here");
+                Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
+                Button bt_finish = (Button)convertview.findViewById(R.id.finish_order_button);
 
+                bt_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         // finishOrder
                         int order_key = orders_cooking.get(arg0).order.id;
-                        Log.d(Constants.LOG_TAG, "finishing order id >> " + order_key);
-                        PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
-                        plateOrderManager.finish(order_key, getActivity());
+                        doubleConfirmCancel(order_key, getActivity());
+                    }
+                });
+
+                bt_finish.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // finishOrder
+                        int order_key = orders_cooking.get(arg0).order.id;
+                        doubleConfirmFinish(order_key, getActivity());
                     }
                 });
 
@@ -117,7 +125,7 @@ public class CookingFragment extends Fragment {
         LayoutInflater inflater;
 
         public class ViewHolder{
-            TextView tv_listrow_cooking;
+            TextView tv_number_slip;
         }
         public GridViewCustomAdapter(Context context){
             inflater = LayoutInflater.from(context);
@@ -140,10 +148,10 @@ public class CookingFragment extends Fragment {
         public View getView(final int arg0, View convertview, ViewGroup arg2) {
             ViewHolder viewHolder = null;
             if(convertview == null) {
-                convertview = inflater.inflate(R.layout.listrow_cooking, null);
+                convertview = inflater.inflate(R.layout.gridview_number_slip, null);
 
                 viewHolder=new ViewHolder();
-                viewHolder.tv_listrow_cooking = (TextView) convertview.findViewById(R.id.tv_listrow_cooking);
+                viewHolder.tv_number_slip = (TextView) convertview.findViewById(R.id.tv_number_slip);
 
                 convertview.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -161,7 +169,7 @@ public class CookingFragment extends Fragment {
 
             // set values
             int ns = orders_cooking.get(arg0).order.pos_slip_number;
-            viewHolder.tv_listrow_cooking.setText("p" + ns);
+            viewHolder.tv_number_slip.setText("p" + ns);
 
             return convertview;
         }
@@ -246,5 +254,50 @@ public class CookingFragment extends Fragment {
 
     public CookingFragment() {
         // Required empty public constructor
+    }
+
+    //================================================================================
+    // Tool Function
+    //================================================================================
+    private void doubleConfirmFinish(final int order_key, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(getString(R.string.double_confirm_finish_message))
+                .setTitle(getString(R.string.double_confirm_finish_title));
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Log.d(Constants.LOG_TAG, "finishing order id >> " + order_key);
+                PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                plateOrderManager.finish(order_key, getActivity());
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // If cancel, do nothing
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void doubleConfirmCancel(final int order_key, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(getString(R.string.double_confirm_cancel_message))
+                .setTitle(getString(R.string.double_confirm_cancel_title));
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
+                PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                plateOrderManager.cancel(order_key, getActivity());
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // If cancel, do nothing
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

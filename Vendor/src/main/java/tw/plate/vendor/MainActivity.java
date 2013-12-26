@@ -90,21 +90,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-
-    // ======= UI Stuff =======
-    private void vendorList() {
-        // FIXME: should download available list from server
-        CharSequence vendorList[] = new CharSequence[] {"v1", "v2", "v3", "v4"};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("選擇登入商家");
-        builder.setItems(vendorList, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // which
-            }
-        });
-        builder.show();
+    private void callPlateOrderManagerLoginAsUsername(String username) {
+        plateOrderManager.loginUsingUsername(username, this);
     }
 
 
@@ -180,6 +167,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            plateOrderManager.switchUser(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

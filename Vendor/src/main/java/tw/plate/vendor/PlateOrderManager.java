@@ -125,6 +125,23 @@ public class PlateOrderManager{
         });
     }
 
+    public void cancel(int order_key, final Activity activity) {
+        plateTWV1.cancel(order_key, new Callback<Response>() {
+            @Override
+            public void success(Response r, Response response) {
+                Log.d(Constants.LOG_TAG, "Cancel: Success!");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(Constants.LOG_TAG, "Cancel: Error : " + error.getMessage());
+                String title = activity.getString(R.string.popup_network_error_title);
+                String message = activity.getString(R.string.popup_network_error_message);
+                popupMessage(title, message, activity);
+            }
+        });
+    }
+
     public void pick(int order_key, final Activity activity) {
         plateTWV1.pick(order_key, new Callback<Response>() {
             @Override
@@ -153,5 +170,48 @@ public class PlateOrderManager{
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void switchUser(final Activity activity) {
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+
+        plateTWV1.vendor_list(new Callback<PlateVendorService.VendorListResponse>() {
+            @Override
+            public void success(PlateVendorService.VendorListResponse r, Response response) {
+                Log.d(Constants.LOG_TAG, "VendorList: Success!");
+                List<String> vendorList = r.vendor_usernames;
+                vendorListPopup(vendorList, activity);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                // select login vendor
+                Log.d(Constants.LOG_TAG, "VendorList: Error : " + error.getMessage());
+            }
+        });
+    }
+
+    // ======= UI Stuff =======
+    private void vendorListPopup(List<String> _vendorList, final Activity activity) {
+
+        final String vendorList[] = new String[_vendorList.size()];
+        _vendorList.toArray(vendorList);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.select_vendor_username));
+        builder.setItems(vendorList, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String selectedUsername = vendorList[which];
+                Log.d(Constants.LOG_TAG, "selected >>" + selectedUsername);
+                loginUsingUsername(selectedUsername, activity);
+            }
+        });
+        builder.show();
+    }
+
+    public void loginUsingUsername(String _username, Activity activity) {
+        username = _username;
+        login(activity);
     }
 }

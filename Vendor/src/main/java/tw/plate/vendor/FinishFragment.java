@@ -142,7 +142,7 @@ public class FinishFragment extends Fragment {
                         Log.d(Constants.LOG_TAG, "clicked");
                         //
                         int order_key = orders_finish.get(arg0).order.id;
-                        Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
+                        Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key + ", arg0 >>" + arg0);
                         doubleConfirmPick(order_key, getActivity());
                     }
                 });

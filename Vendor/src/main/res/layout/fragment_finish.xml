@@ -7,7 +7,9 @@
         android:id="@+id/gv_finish"
         android:numColumns="5"
         android:layout_width="fill_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:padding="30dp"
+        />
     <ListView
         android:id="@+id/lv_finish"
         android:layout_width="match_parent"

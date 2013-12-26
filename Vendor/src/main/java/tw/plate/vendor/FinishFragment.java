@@ -136,23 +136,24 @@ public class FinishFragment extends Fragment {
                 viewHolder=new ViewHolder();
                 viewHolder.tv_number_slip_large = (TextView) convertview.findViewById(R.id.tv_number_slip_large);
 
-                convertview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Log.d(Constants.LOG_TAG, "clicked");
-                        //
-                        PlateVendorService.OrderSingle orderSingle = orders_finish.get(arg0);
-                        int order_key = orders_finish.get(arg0).order.id;
-                        Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key + ", arg0 >>" + arg0);
-                        doubleConfirmPick(order_key, orderSingle, getActivity());
-                    }
-                });
 
                 convertview.setTag(viewHolder);
             }
             else {
                 viewHolder=(ViewHolder)convertview.getTag();
             }
+
+            convertview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d(Constants.LOG_TAG, "clicked");
+                    //
+                    PlateVendorService.OrderSingle orderSingle = orders_finish.get(arg0);
+                    int order_key = orders_finish.get(arg0).order.id;
+                    Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key + ", arg0 >>" + arg0);
+                    doubleConfirmPick(order_key, orderSingle, getActivity());
+                }
+            });
 
             // set values
             int ns = orders_finish.get(arg0).order.pos_slip_number %100;

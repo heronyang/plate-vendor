@@ -79,27 +79,6 @@ public class CookingFragment extends Fragment {
                 viewHolder.tv_phone = (TextView) convertview.findViewById(R.id.tv_phone);
                 viewHolder.tv_totalPrice = (TextView) convertview.findViewById(R.id.tv_total_price);
 
-                Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
-                Button bt_finish = (Button)convertview.findViewById(R.id.finish_order_button);
-
-                bt_cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // finishOrder
-                        int order_key = orders_cooking.get(arg0).order.id;
-                        doubleConfirmCancel(order_key, getActivity());
-                    }
-                });
-
-                bt_finish.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // finishOrder
-                        int order_key = orders_cooking.get(arg0).order.id;
-                        doubleConfirmFinish(order_key, getActivity());
-                    }
-                });
-
                 convertview.setTag(viewHolder);
             }
             else {
@@ -110,6 +89,27 @@ public class CookingFragment extends Fragment {
             PlateVendorService.OrderV1 o = orders_cooking.get(arg0).order;
             //output += ("time : " + o.mtime + "\n");
             //output += ("ph : " + orders_cooking.get(arg0).user.username + "\n");
+            Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
+            Button bt_finish = (Button)convertview.findViewById(R.id.finish_order_button);
+
+            bt_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // finishOrder
+                    int order_key = orders_cooking.get(arg0).order.id;
+                    doubleConfirmCancel(order_key, getActivity());
+                }
+            });
+
+            bt_finish.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // finishOrder
+                    int order_key = orders_cooking.get(arg0).order.id;
+                    doubleConfirmFinish(order_key, getActivity());
+                }
+            });
+
 
             List<PlateVendorService.OrderItemV1> order_items = orders_cooking.get(arg0).order_items;
             int totalPrice = 0;

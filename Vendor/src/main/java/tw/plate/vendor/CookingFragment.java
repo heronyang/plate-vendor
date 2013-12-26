@@ -121,7 +121,7 @@ public class CookingFragment extends Fragment {
 
             viewHolder.tv_totalPrice.setText(totalPrice+" 元");
             viewHolder.tv_phone.setText(orders_cooking.get(arg0).user.username +"");
-            viewHolder.tv_slip_number.setText(o.pos_slip_number+"");
+            viewHolder.tv_slip_number.setText((o.pos_slip_number%100)+"");
             viewHolder.tv_listrow_cooking.setText(output);
 
             return convertview;
@@ -176,7 +176,7 @@ public class CookingFragment extends Fragment {
             }
 
             // set values
-            int ns = orders_cooking.get(arg0).order.pos_slip_number;
+            int ns = orders_cooking.get(arg0).order.pos_slip_number%100;
             viewHolder.tv_number_slip.setText("" + ns);
 
             return convertview;

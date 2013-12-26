@@ -85,7 +85,7 @@ public class FinishFragment extends Fragment {
             String output = "";
             PlateVendorService.OrderV1 o = orders_finish.get(arg0).order;
             output += ("time : " + o.mtime + "\n");
-            output += ("ns : " + o.pos_slip_number + "\n");
+            output += ("ns : " + o.pos_slip_number %100 + "\n");
             output += ("ph : " + orders_finish.get(arg0).user.username + "\n");
 
             List<PlateVendorService.OrderItemV1> order_items = orders_finish.get(arg0).order_items;
@@ -155,7 +155,7 @@ public class FinishFragment extends Fragment {
             }
 
             // set values
-            int ns = orders_finish.get(arg0).order.pos_slip_number;
+            int ns = orders_finish.get(arg0).order.pos_slip_number %100;
             viewHolder.tv_number_slip_large.setText(""+ns);
 
             return convertview;
@@ -259,7 +259,7 @@ public class FinishFragment extends Fragment {
         order_content += "\n總計：" + totalPrice + "NTD\n";
 
         builder.setMessage(getString(R.string.double_confirm_pick_message) + "\n" + order_content)
-                .setTitle("號碼牌" + orderSingle.order.pos_slip_number + " : " + getString(R.string.double_confirm_pick_title));
+                .setTitle("號碼牌" + orderSingle.order.pos_slip_number%100 + " : " + getString(R.string.double_confirm_pick_title));
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);

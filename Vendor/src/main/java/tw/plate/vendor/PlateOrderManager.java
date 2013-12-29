@@ -142,8 +142,8 @@ public class PlateOrderManager{
         });
     }
 
-    public void pick(int order_key, final Activity activity) {
-        plateTWV1.pick(order_key, new Callback<Response>() {
+    public void pickup(int order_key, final Activity activity) {
+        plateTWV1.pickup(order_key, new Callback<Response>() {
             @Override
             public void success(Response r, Response response) {
                 Log.d(Constants.LOG_TAG, "Finish: Success!");
@@ -158,6 +158,8 @@ public class PlateOrderManager{
             }
         });
     }
+
+    // ======= UI Stuff =======
 
     private void popupMessage(String title, String message, Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -191,7 +193,6 @@ public class PlateOrderManager{
         });
     }
 
-    // ======= UI Stuff =======
     private void vendorListPopup(List<String> _vendorList, final Activity activity) {
 
         final String vendorList[] = new String[_vendorList.size()];

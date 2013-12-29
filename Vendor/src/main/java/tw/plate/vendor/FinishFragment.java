@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -68,11 +67,11 @@ public class FinishFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
-                        // pick order
+                        // pickup order
                         int order_key = orders_finish.get(arg0).order.id;
                         Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
                         PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
-                        plateOrderManager.pick(order_key, getActivity());
+                        plateOrderManager.pickup(order_key, getActivity());
                     }
                 });
 
@@ -265,7 +264,7 @@ public class FinishFragment extends Fragment {
             public void onClick(DialogInterface dialog, int id) {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
-                plateOrderManager.pick(order_key, getActivity());
+                plateOrderManager.pickup(order_key, getActivity());
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

@@ -7,8 +7,9 @@ final public class Constants {
     // SERVER URI
     //public static final String API_URI_PREFIX = "http://10.0.2.2:8080"; // Developing Mode (Emulator)
     //public static final String API_URI_PREFIX = "http://192.168.0.115:8080"; // Heron's Local Developing Mode
+    public static final String API_URI_PREFIX = "http://192.168.0.192:8080"; // Heron's Local Developing Mode
     //public static final String API_URI_PREFIX = "http://106.187.89.91:8080"; // Heron's Local Developing Mode
-    public static final String API_URI_PREFIX = "http://api-dev.plate.tw:8080"; // Heron's Local Developing Mode
+    //public static final String API_URI_PREFIX = "http://api.plate.tw"; // Heron's Local Developing Mode
 
     //
     public static final String LOG_TAG = "PlateVendorLog";

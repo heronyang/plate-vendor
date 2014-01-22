@@ -2,6 +2,7 @@ package tw.plate.vendor;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -268,6 +271,7 @@ public class CookingFragment extends Fragment {
     // Tool Function
     //================================================================================
     private void doubleConfirmFinish(final int order_key, Activity activity) {
+        /*
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(getString(R.string.double_confirm_finish_message))
                 .setTitle(getString(R.string.double_confirm_finish_title));
@@ -286,26 +290,62 @@ public class CookingFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+        */
+
+        final Dialog dialog = new Dialog(activity);
+        dialog.setContentView(R.layout.dialog_custom);
+        dialog.setTitle(getString(R.string.double_confirm_finish_title));
+
+        TextView message = (TextView) dialog.findViewById(R.id.tv_dialog);
+        message.setText(getString(R.string.double_confirm_finish_message));
+
+        Button okButton = (Button) dialog.findViewById(R.id.btn_dialog_continue);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(Constants.LOG_TAG, "finishing order id >> " + order_key);
+                PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
+                plateOrderManager.finish(order_key, getActivity());
+                dialog.dismiss();
+            }
+        });
+        Button cancelButton = (Button) dialog.findViewById(R.id.btn_dialog_back);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     private void doubleConfirmCancel(final int order_key, Activity activity) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(getString(R.string.double_confirm_cancel_message))
-                .setTitle(getString(R.string.double_confirm_cancel_title));
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+        final Dialog dialog = new Dialog(activity);
+        dialog.setContentView(R.layout.dialog_custom);
+        dialog.setTitle(getString(R.string.double_confirm_cancel_title));
+
+        TextView message = (TextView) dialog.findViewById(R.id.tv_dialog);
+        message.setText(getString(R.string.double_confirm_cancel_message));
+
+        Button okButton = (Button) dialog.findViewById(R.id.btn_dialog_continue);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
                 plateOrderManager.cancel(order_key, getActivity());
+                dialog.dismiss();
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // If cancel, do nothing
+        Button cancelButton = (Button) dialog.findViewById(R.id.btn_dialog_back);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
             }
         });
 
-        AlertDialog dialog = builder.create();
         dialog.show();
     }
 }

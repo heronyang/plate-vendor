@@ -97,7 +97,7 @@ public class PlateVendorService {
 
         @FormUrlEncoded
         @POST("/1/pick")
-        void pick(@Field("order_key") int order_key,
+        void pickup(@Field("order_key") int order_key,
                     Callback<Response> cb);
 
         @FormUrlEncoded

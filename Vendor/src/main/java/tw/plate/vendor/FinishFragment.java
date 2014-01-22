@@ -2,9 +2,9 @@ package tw.plate.vendor;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -68,11 +69,11 @@ public class FinishFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
-                        // pick order
+                        // pickup order
                         int order_key = orders_finish.get(arg0).order.id;
                         Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
                         PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
-                        plateOrderManager.pick(order_key, getActivity());
+                        plateOrderManager.pickup(order_key, getActivity());
                     }
                 });
 
@@ -248,8 +249,6 @@ public class FinishFragment extends Fragment {
     // Tool Function
     //================================================================================
     private void doubleConfirmPick(final int order_key, PlateVendorService.OrderSingle orderSingle, Activity activity) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
         String order_content;
         order_content = "電話號碼：" + orderSingle.user.username + "\n\n";
         int totalPrice = 0;
@@ -259,22 +258,31 @@ public class FinishFragment extends Fragment {
         }
         order_content += "\n總計：" + totalPrice + "NTD\n";
 
-        builder.setMessage(getString(R.string.double_confirm_pick_message) + "\n" + order_content)
-                .setTitle("號碼牌" + orderSingle.order.pos_slip_number%100 + " : " + getString(R.string.double_confirm_pick_title));
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+        final Dialog dialog = new Dialog(activity);
+        dialog.setContentView(R.layout.dialog_custom);
+        dialog.setTitle("號碼牌" + orderSingle.order.pos_slip_number%100 + " : " + getString(R.string.double_confirm_pick_title));
+
+        TextView message = (TextView) dialog.findViewById(R.id.tv_dialog);
+        message.setText(getString(R.string.double_confirm_pick_message) + "\n" + order_content);
+
+        Button okButton = (Button) dialog.findViewById(R.id.btn_dialog_continue);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
-                plateOrderManager.pick(order_key, getActivity());
+                plateOrderManager.pickup(order_key, getActivity());
+                dialog.dismiss();
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // If cancel, do nothing
+        Button cancelButton = (Button) dialog.findViewById(R.id.btn_dialog_back);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
             }
         });
 
-        AlertDialog dialog = builder.create();
         dialog.show();
     }
 }

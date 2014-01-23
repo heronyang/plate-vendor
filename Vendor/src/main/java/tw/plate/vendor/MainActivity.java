@@ -3,6 +3,7 @@ package tw.plate.vendor;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,20 +19,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, PlateOrderManager.PlateOrderManagerCallback {
 
@@ -42,6 +41,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     ViewPager mViewPager;
     public static PlateOrderManager plateOrderManager;
+    private Menu menu;
 
     //================================================================================
     // Layout Setup
@@ -52,6 +52,20 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowHomeEnabled(false);     // turn off display
         actionBar.setDisplayShowTitleEnabled(false);    // turn off display
+        /*
+        actionBar.setDisplayShowCustomEnabled(true);
+
+        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.title_view, null);
+
+        //if you need to customize anything else about the text, do it here.
+        //I'm using a custom TextView with a custom font in my layout xml so all I need to do is set title
+        ((TextView)v.findViewById(R.id.title)).setText(this.getTitle());
+
+        //assign the view to the actionbar
+        this.getActionBar().setCustomView(v);
+        */
+
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -79,10 +93,23 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // this tab is selected.
             //int[] tabsResources= new int[]{R.drawable.tab_location_trans,R.drawable.tab_bill_trans};
 
+            ActionBar.Tab tab = actionBar.newTab();
+            TextView customTabView = (TextView)getLayoutInflater().inflate(R.layout.custom_tab, null);
+            if (customTabView == null) {
+                throw new NullPointerException("custom tab view failed");
+            }
+
             String text = "";
             if (i==0)   text = getString(R.string.tab_cooking);
             else if (i==1)   text = getString(R.string.tab_finish);
 
+            customTabView.setText(text);
+            customTabView.setHeight(200);
+            tab.setCustomView(customTabView);
+            tab.setTabListener(this);
+            actionBar.addTab(tab);
+
+            /*
             actionBar.addTab(
                     actionBar.newTab()
                             .setTabListener(this)
@@ -90,6 +117,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     //.setText(mSectionsPagerAdapter.getPageTitle(i))
                     //.setIcon(getResources().getDrawable(tabsResources[i]))
             );
+            */
         }
     }
 
@@ -156,6 +184,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private void refreshData() {
         Log.d(Constants.LOG_TAG, "Main: refresh");
         plateOrderManager.update(this);
+        plateOrderManager.updateRestStatus(this);
     }
 
     // This snippet hides the system bars.
@@ -197,7 +226,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        //getMenuInflater().inflate(R.menu.main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+        this.menu = menu;
+
         return true;
     }
 
@@ -210,7 +244,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         if (id == R.id.action_settings) {
             plateOrderManager.switchUser(this);
             return true;
+        } else if (id == R.id.action_set_busy) {
+            plateOrderManager.setBusy(this);
+            return true;
+        } else if (id == R.id.action_set_not_busy) {
+            plateOrderManager.setNotBusy(this);
+            return true;
+        } else if (id == R.id.action_rest_status) {
+
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -314,6 +358,31 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void loginCompleted() {
         Log.d(Constants.LOG_TAG, "login completed");
         plateOrderManager.update(this);
+    }
+
+    @Override
+    public void statusUpdate() {
+        Constants.Status status = plateOrderManager.status;
+        MenuItem statusItem = menu.findItem(R.id.action_rest_status);
+        if (statusItem == null) return;
+        switch (status) {
+            case RESTAURANT_STATUS_CLOSE:
+                Log.d(Constants.LOG_TAG, "restaurant close");
+                statusItem.setTitle(getString(R.string.rest_status_close));
+                break;
+            case RESTAURANT_STATUS_OPEN:
+                Log.d(Constants.LOG_TAG, "restaurant open");
+                statusItem.setTitle(getString(R.string.rest_status_open));
+                break;
+            case RESTAURANT_STATUS_BUSY:
+                Log.d(Constants.LOG_TAG, "restaurant busy");
+                statusItem.setTitle(getString(R.string.rest_status_busy));
+                break;
+            default:
+                Log.d(Constants.LOG_TAG, "know status");
+                statusItem.setTitle(getString(R.string.rest_status_error));
+                break;
+        }
     }
 
     //

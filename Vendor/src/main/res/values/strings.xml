@@ -35,4 +35,16 @@
     <string name="double_confirm_finish_message">通知該使用者到現場領餐</string>
     <string name="double_confirm_pick_title">領餐</string>
     <string name="double_confirm_pick_message">使用者到現場並領餐，將完成該筆交易</string>
+    <string name="action_set_busy">設定成忙碌中</string>
+    <string name="action_set_not_busy">關閉忙碌中</string>
+    <string name="action_system_setting">系統設定</string>
+    <string name="popup_set_title">設定成功</string>
+    <string name="popup_set_to_busy_message">已經設定為忙碌中</string>
+    <string name="popup_set_to_not_busy_message">已經關閉忙碌中狀態</string>
+
+    <string name="rest_status_default">載入中…</string>
+    <string name="rest_status_close">關店中</string>
+    <string name="rest_status_open">營業中</string>
+    <string name="rest_status_busy">忙碌中</string>
+    <string name="rest_status_error">系統整理中</string>
 </resources>

@@ -2,9 +2,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="tw.plate.vendor.MainActivity" >
-    
+
+    <item android:id="@+id/action_rest_status"
+        android:title="@string/rest_status_default"
+        app:showAsAction="ifRoom|withText"
+        android:actionLayout="@layout/restaurant_status"
+        />
+
+    <item android:id="@+id/action_set_busy"
+        android:title="@string/action_set_busy"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/action_set_not_busy"
+        android:title="@string/action_set_not_busy"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
     <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+        android:title="@string/action_system_setting"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

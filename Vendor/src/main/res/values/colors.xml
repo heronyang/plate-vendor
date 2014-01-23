@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="color_5">#ec6941</color>
+    <color name="color_6">#d20101</color>
 
     <color name="color_1_grad1">#ebebeb</color>
     <color name="color_1_grad2">#b8b8b8</color>
 
     <color name="color_2">#4f4f4f</color>
 
-
+    <color name="actionbar_color">#5f3209</color>
+    <color name="actionbar_text_color">#ffffff</color>
 
 </resources>

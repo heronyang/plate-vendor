@@ -80,6 +80,10 @@ public class PlateVendorService {
         public List<String> vendor_usernames;
     }
 
+    public class RestStatusResponse {
+        public int status;
+    }
+
     interface PlateTWAPI1 {
         @FormUrlEncoded
         @POST("/1/login")
@@ -104,6 +108,15 @@ public class PlateVendorService {
         @POST("/1/cancel")
         void cancel(@Field("order_key") int order_key,
                     Callback<Response> cb);
+
+        @POST("/1/set_busy")
+        void set_busy(Callback<Response> cb);
+
+        @POST("/1/set_not_busy")
+        void set_not_busy(Callback<Response> cb);
+
+        @GET("/1/get_rest_status")
+        void get_rest_status(Callback<RestStatusResponse> cb);
 
         @GET("/1/vendor_list")
         void vendor_list(Callback<VendorListResponse> cb);

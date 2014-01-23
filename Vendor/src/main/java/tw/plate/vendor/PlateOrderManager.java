@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.net.ContentHandler;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.List;
@@ -22,6 +23,7 @@ import retrofit.client.Response;
 public class PlateOrderManager{
 
     String password, username;
+    Constants.Status status = Constants.Status.RESTAURANT_STATUS_CLOSE; // default
 
     PlateVendorService.PlateTWAPI1 plateTWV1;
     List<PlateVendorService.OrderSingle> orders;
@@ -32,6 +34,7 @@ public class PlateOrderManager{
     public interface PlateOrderManagerCallback {
         void orderUpdated();
         void loginCompleted();
+        void statusUpdate();
     }
     private PlateOrderManagerCallback callerActivity;
 
@@ -191,6 +194,65 @@ public class PlateOrderManager{
                 Log.d(Constants.LOG_TAG, "VendorList: Error : " + error.getMessage());
             }
         });
+    }
+
+    public void setBusy(final Activity activity) {
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+        plateTWV1.set_busy(new Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                String title = activity.getString(R.string.popup_set_title);
+                String message = activity.getString(R.string.popup_set_to_busy_message);
+                popupMessage(title, message, activity);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                String title = activity.getString(R.string.popup_network_error_title);
+                String message = activity.getString(R.string.popup_network_error_message);
+                popupMessage(title, message, activity);
+            }
+        });
+
+    }
+
+    public void setNotBusy(final Activity activity) {
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+        plateTWV1.set_not_busy(new Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                String title = activity.getString(R.string.popup_set_title);
+                String message = activity.getString(R.string.popup_set_to_not_busy_message);
+                popupMessage(title, message, activity);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                String title = activity.getString(R.string.popup_network_error_title);
+                String message = activity.getString(R.string.popup_network_error_message);
+                popupMessage(title, message, activity);
+            }
+        });
+
+    }
+
+    public void updateRestStatus(final Activity activity) {
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+        plateTWV1.get_rest_status(new Callback<PlateVendorService.RestStatusResponse>() {
+            @Override
+            public void success(PlateVendorService.RestStatusResponse restStatusResponse, Response response) {
+                Log.d(Constants.LOG_TAG, "status >> " + restStatusResponse.status);
+                status = Constants.Status.values()[restStatusResponse.status];
+                callerActivity = (PlateOrderManagerCallback)activity;
+                callerActivity.statusUpdate();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(Constants.LOG_TAG, "status update failed");
+            }
+        });
+
     }
 
     private void vendorListPopup(List<String> _vendorList, final Activity activity) {

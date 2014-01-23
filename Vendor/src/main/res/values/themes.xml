@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ActionBar styles -->
+    <style name="MyActionBar"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/actionbar_color</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@color/actionbar_color</item>
+    </style>
+
+    <!-- ActionBar title text -->
+    <style name="MyActionBarTitleText"
+        parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/actionbar_text_color</item>
+        <!-- The textColor property is backward compatible with the Support Library -->
+    </style>
+
+    <!-- ActionBar tabs text -->
+    <style name="MyActionBarTabText"
+        parent="@style/Widget.AppCompat.ActionBar.TabText">
+        <item name="android:textColor">@color/actionbar_text_color</item>
+        <!-- The textColor property is backward compatible with the Support Library -->
+    </style>
+
+</resources>

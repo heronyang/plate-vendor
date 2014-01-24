@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
 
     <!-- tab -->
-    <string name="tab_cooking">正在煮</string>
+    <string name="tab_cooking">要煮的</string>
     <string name="tab_finish">煮好的</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="cancel">返回</string>
@@ -47,4 +47,6 @@
     <string name="rest_status_open">營業中</string>
     <string name="rest_status_busy">忙碌中</string>
     <string name="rest_status_error">系統整理中</string>
+    <string name="password_input_title">輸入密碼</string>
+    <string name="wrong_password_message">密碼錯誤</string>
 </resources>

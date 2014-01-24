@@ -5,8 +5,8 @@
 
     <item android:id="@+id/action_rest_status"
         android:title="@string/rest_status_default"
+        android:icon="@drawable/circle_02"
         app:showAsAction="ifRoom|withText"
-        android:actionLayout="@layout/restaurant_status"
         />
 
     <item android:id="@+id/action_set_busy"

@@ -9,7 +9,7 @@
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:gravity="center"
-        android:textSize="50sp"
+        android:textSize="30sp"
         android:background="@drawable/circle_02"
         android:id="@+id/tv_number_slip" />
 

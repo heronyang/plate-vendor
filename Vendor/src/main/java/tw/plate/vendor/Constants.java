@@ -22,6 +22,7 @@ final public class Constants {
 
     // password for vendor
     public static final String VENDOR_PASSWORD = "platerocks";
+    public static final String SWITCH_USER_PASSWORD = "etalp";
 
 
     // states

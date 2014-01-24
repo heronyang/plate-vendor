@@ -3,40 +3,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="top"
     android:background="@drawable/silver_background"
     >
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Text"
         android:textSize="@dimen/dialog_text_size"
-        android:gravity="center_horizontal"
+        android:gravity="left"
+        android:text="test"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
         android:id="@+id/tv_dialog"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:layout_width="150dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:textSize="@dimen/dialog_btn_text_size"
         android:background="@color/color_2"
         android:textColor="#FFF"
+        android:height="100dp"
         android:id="@+id/btn_dialog_back"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:layout_width="150dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="@string/ok"
         android:id="@+id/btn_dialog_continue"
         android:textSize="@dimen/dialog_btn_text_size"
         android:background="@color/color_2"
         android:textColor="#FFF"
+        android:height="100dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />

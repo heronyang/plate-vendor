@@ -2,11 +2,10 @@ package tw.plate.vendor;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,6 +15,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,13 +24,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Handler;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, PlateOrderManager.PlateOrderManagerCallback {
 
@@ -42,6 +47,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     ViewPager mViewPager;
     public static PlateOrderManager plateOrderManager;
     private Menu menu;
+
+    private static Timer timer;
+    private static TimerTask timerTask;
 
     //================================================================================
     // Layout Setup
@@ -153,16 +161,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // setup system-wide cookie
         setupCookie();
-        /*
-        int mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-
-        getWindow().getDecorView().setSystemUiVisibility(mUIFlag);
-        */
 
         // login, and first update
         plateOrderManager = new PlateOrderManager(this);
@@ -172,13 +170,23 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         layout_setup();
 
         // regular refresh
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        timerStart();
+    }
+
+    /* Timer */
+    public void timerStop() {
+        timer.cancel();
+    }
+
+    public void timerStart() {
+        timer = new Timer();
+        timerTask = new TimerTask() {
             @Override
             public void run() {
                 refreshData();
             }
-        }, 0, Constants.REFRESH_INT);
+        };
+        timer.schedule(timerTask, 0, Constants.REFRESH_INT);
     }
 
     private void refreshData() {
@@ -186,6 +194,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         plateOrderManager.update(this);
         plateOrderManager.updateRestStatus(this);
     }
+
+    // ======================
 
     // This snippet hides the system bars.
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -230,8 +240,59 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        this.menu = menu;
+        // FIXME: trying to modify the font size and color for menu item (rest status), but failed
+        /*
+        LayoutInflater layoutInflater = getLayoutInflater();
+        final LayoutInflater.Factory existingFactory = layoutInflater.getFactory();
+// use introspection to allow a new Factory to be set
+        try {
+            Field field = LayoutInflater.class.getDeclaredField("mFactorySet");
+            field.setAccessible(true);
+            field.setBoolean(layoutInflater, false);
 
+            getLayoutInflater().setFactory(new LayoutInflater.Factory() {
+                @Override
+                public View onCreateView(String name, Context context,
+                                         AttributeSet attrs) {
+                    View view = null;
+                    // if a factory was already set, we use the returned view
+                    if (existingFactory != null) {
+                        view = existingFactory.onCreateView(name, context, attrs);
+                    }
+                    if (name.equalsIgnoreCase("com.android.internal.view.menu.IconMenuItemView")) {
+                        try {
+                            LayoutInflater f = getLayoutInflater();
+                            view = f.createView(name, null, attrs);
+                            final View _view = view;
+                            new Handler().post(new Runnable() {
+                                public void run() {
+                                    // set the background drawable
+                                    //view.setBackgroundResource(R.drawable.my_ac_menu_background);
+                                    ((TextView) _view).setTextColor(Color.YELLOW);
+                                    ((TextView) _view).setTextSize(35);
+                                }
+                            });
+                            return view;
+                        } catch (InflateException e) {
+                            Log.d(Constants.LOG_TAG, "error: " + e.getMessage());
+                        } catch (ClassNotFoundException e) {
+                            Log.d(Constants.LOG_TAG, "error: " + e.getMessage());
+                        }
+                    }
+                    return null;
+                }
+            });
+        } catch (NoSuchFieldException e) {
+            // ...
+        } catch (IllegalArgumentException e) {
+            // ...
+        } catch (IllegalAccessException e) {
+            // ...
+        }
+
+        return super.onCreateOptionsMenu(menu);
+        */
+        this.menu = menu;
         return true;
     }
 
@@ -242,7 +303,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            plateOrderManager.switchUser(this);
+            simpleVerificationAndSwitchUser();
             return true;
         } else if (id == R.id.action_set_busy) {
             plateOrderManager.setBusy(this);
@@ -256,6 +317,44 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void simpleVerificationAndSwitchUser() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.password_input_title));
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String pw = input.getText().toString();
+                Log.d(Constants.LOG_TAG, "password >> " + pw);
+                if (pw.equals(Constants.SWITCH_USER_PASSWORD)) {
+                    switchUser();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.wrong_password_message),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void switchUser() {
+        plateOrderManager.switchUser(this);
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -352,6 +451,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         tag = makeFragmentName(R.id.pager, 1);
         FinishFragment finishFragment = (FinishFragment)fm.findFragmentByTag(tag);
         finishFragment.finishListUpdate();
+
+        // see if there's any new order
+        ringIfNewOrder();
     }
 
     @Override
@@ -369,13 +471,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             case RESTAURANT_STATUS_CLOSE:
                 Log.d(Constants.LOG_TAG, "restaurant close");
                 statusItem.setTitle(getString(R.string.rest_status_close));
+                statusItem.setIcon(getResources().getDrawable(R.drawable.circle_red));
                 break;
             case RESTAURANT_STATUS_OPEN:
                 Log.d(Constants.LOG_TAG, "restaurant open");
+                statusItem.setIcon(getResources().getDrawable(R.drawable.circle_green));
                 statusItem.setTitle(getString(R.string.rest_status_open));
                 break;
             case RESTAURANT_STATUS_BUSY:
                 Log.d(Constants.LOG_TAG, "restaurant busy");
+                statusItem.setIcon(getResources().getDrawable(R.drawable.circle_yellow));
                 statusItem.setTitle(getString(R.string.rest_status_busy));
                 break;
             default:
@@ -390,6 +495,36 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         return "android:switcher:" + viewId + ":" + index;
     }
 
+    /* New Order Ringtone */
+    private void ringIfNewOrder() {
+        int max_number_slip = ((PlateVendor)getApplication()).max_number_slip;
+        boolean newOrderExist = false;
+        List<PlateVendorService.OrderSingle> orders = plateOrderManager.orders;
+        for (int i=0 ; i<orders.size() ; i++) {
+            int ns = orders.get(i).order.pos_slip_number;
+            if (ns > max_number_slip) {
+                ((PlateVendor)getApplication()).max_number_slip = ns;
+                newOrderExist = true;
+            }
+        }
+        // play ringtone
+        if (newOrderExist)  playNewOrderRingtone();
+    }
+
+    private MediaPlayer mediaPlayer;
+    private void playNewOrderRingtone() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying())    mediaPlayer.stop();
+        mediaPlayer = MediaPlayer.create(this, R.raw.new_order2);
+        mediaPlayer.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        mediaPlayer = null;
+        super.onDestroy();
+    }
 
     //================================================================================
     // End

@@ -6,4 +6,6 @@
     android:paddingBottom="14dp"
     android:gravity="center"
     android:text="@string/rest_status_default"
+    android:textSize="35sp"
+    android:textColor="@color/actionbar_text_color"
     android:clickable="true" />

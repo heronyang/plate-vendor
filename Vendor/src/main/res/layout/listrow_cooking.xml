@@ -18,12 +18,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="25sp"
-            android:text="tv_listrow_cooking"
             android:gravity="center"
+            android:layout_marginLeft="170dp"
+            android:layout_marginTop="5dp"
             android:id="@+id/tv_listrow_cooking"
             android:layout_below="@+id/tv_phone"
-            android:layout_toRightOf="@+id/tv_slip_number"
-            android:layout_toLeftOf="@+id/tv_total_price" />
+            android:layout_toRightOf="@+id/tv_slip_number"/>
 
         <Button
             android:layout_margin="5dp"
@@ -49,10 +49,10 @@
         <TextView
             android:layout_width="70dp"
             android:layout_height="70dp"
+            android:text="A01"
             android:gravity="center"
-            android:textSize="50sp"
+            android:textSize="30sp"
             android:background="@drawable/circle_02"
-            android:text="Number"
             android:id="@+id/tv_slip_number"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"/>
@@ -60,20 +60,32 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
-            android:text="tv_phone"
+            android:textSize="20sp"
             android:id="@+id/tv_phone"
+            android:text="0912321321"
+            android:textColor="@color/color_2"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/tv_slip_number"
-            android:layout_marginLeft="79dp" />
+            android:layout_marginLeft="25dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:id="@+id/tv_datetime"
+            android:text="12:00 "
+            android:textColor="@color/color_2"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/tv_phone"
+            android:layout_marginLeft="30dp" />
 
         <TextView
             android:layout_margin="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="50sp"
+            android:text="150 元"
             android:textColor="#ff4a2d"
-            android:text="50nt"
             android:id="@+id/tv_total_price"
             android:layout_below="@+id/cancel_order_button"
             android:layout_alignRight="@+id/finish_order_button" />

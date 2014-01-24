@@ -54,8 +54,8 @@ public class PlateVendorService {
 
     public class OrderV1 {
         /* FIXME: ctime, mtime should be in Data format */
-        public String ctime;
-        public String mtime;
+        public Date ctime;
+        public Date mtime;
         public int id;                  // new in vendor API, but not in client app
         public int pos_slip_number;
         public int status;
@@ -100,7 +100,7 @@ public class PlateVendorService {
                     Callback<Response> cb);
 
         @FormUrlEncoded
-        @POST("/1/pick")
+        @POST("/1/pickup")
         void pickup(@Field("order_key") int order_key,
                     Callback<Response> cb);
 
@@ -135,9 +135,9 @@ public class PlateVendorService {
 			 * */
             String fmt;
             if (System.getProperty("java.runtime.name").equals("Android Runtime")) {
-                fmt = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+                fmt = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
             } else {
-                fmt = "yyyy-MM-dd'T'HH:mm:ssX";
+                fmt = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
             }
             sdf = new SimpleDateFormat(fmt, Locale.US);
         }
@@ -145,7 +145,9 @@ public class PlateVendorService {
         public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             try {
-                return sdf.parse(json.getAsJsonPrimitive().getAsString());
+                String s = json.getAsJsonPrimitive().getAsString();
+                String dateWithoutMicros = s.substring(0, s.length() - 9) + s.substring(s.length() - 6);
+                return sdf.parse(dateWithoutMicros);
             } catch (ParseException e) {
                 throw new JsonParseException(e.getMessage());
             }

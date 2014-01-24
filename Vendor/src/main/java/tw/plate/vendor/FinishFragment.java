@@ -1,12 +1,14 @@
 package tw.plate.vendor;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +19,10 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -29,6 +34,8 @@ public class FinishFragment extends Fragment {
 
     List<PlateVendorService.OrderSingle> orders;
     List<PlateVendorService.OrderSingle> orders_finish;
+
+    Tool tool;
 
     //================================================================================
     // Adapters
@@ -69,6 +76,7 @@ public class FinishFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         Log.d(Constants.LOG_TAG, "clicked");
+
                         // pickup order
                         int order_key = orders_finish.get(arg0).order.id;
                         Log.d(Constants.LOG_TAG, "picking up order id >> " + order_key);
@@ -86,7 +94,7 @@ public class FinishFragment extends Fragment {
             String output = "";
             PlateVendorService.OrderV1 o = orders_finish.get(arg0).order;
             output += ("time : " + o.mtime + "\n");
-            output += ("ns : " + o.pos_slip_number %100 + "\n");
+            output += ("ns : " + tool.formattedNS(o.pos_slip_number) + "\n");
             output += ("ph : " + orders_finish.get(arg0).user.username + "\n");
 
             List<PlateVendorService.OrderItemV1> order_items = orders_finish.get(arg0).order_items;
@@ -148,6 +156,10 @@ public class FinishFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Log.d(Constants.LOG_TAG, "clicked");
+
+                    // disable the button first
+                    removeNumberslipAndFreeze(arg0);
+
                     //
                     PlateVendorService.OrderSingle orderSingle = orders_finish.get(arg0);
                     int order_key = orders_finish.get(arg0).order.id;
@@ -157,8 +169,8 @@ public class FinishFragment extends Fragment {
             });
 
             // set values
-            int ns = orders_finish.get(arg0).order.pos_slip_number %100;
-            viewHolder.tv_number_slip_large.setText(""+ns);
+            int ns = orders_finish.get(arg0).order.pos_slip_number;
+            viewHolder.tv_number_slip_large.setText(""+ tool.formattedNS(ns));
 
             return convertview;
         }
@@ -190,6 +202,8 @@ public class FinishFragment extends Fragment {
 
     public void gridViewUpdate() {
         gridviewCustomAdapter.notifyDataSetChanged();
+        // set all enable
+        enableListedFinishNumberslipAll();
     }
 
     //================================================================================
@@ -197,6 +211,7 @@ public class FinishFragment extends Fragment {
     //================================================================================
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        tool = new Tool();
         super.onCreate(savedInstanceState);
     }
 
@@ -249,8 +264,13 @@ public class FinishFragment extends Fragment {
     // Tool Function
     //================================================================================
     private void doubleConfirmPick(final int order_key, PlateVendorService.OrderSingle orderSingle, Activity activity) {
-        String order_content;
-        order_content = "電話號碼：" + orderSingle.user.username + "\n\n";
+        String order_content = "";
+        order_content += "電話號碼：" + orderSingle.user.username + "\n";
+
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date ctime = orderSingle.order.ctime;
+        order_content += "訂餐時間：" + df.format(ctime) + "\n\n";
+
         int totalPrice = 0;
         for (PlateVendorService.OrderItemV1 oi : orderSingle.order_items) {
             order_content += oi.meal.meal_name + " * " + oi.amount + "\n";
@@ -260,7 +280,10 @@ public class FinishFragment extends Fragment {
 
         final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_custom);
-        dialog.setTitle("號碼牌" + orderSingle.order.pos_slip_number%100 + " : " + getString(R.string.double_confirm_pick_title));
+        dialog.setCanceledOnTouchOutside(false);
+
+        String formattedNS = tool.formattedNS(orderSingle.order.pos_slip_number);
+        dialog.setTitle("號碼牌" + formattedNS + " : " + getString(R.string.double_confirm_pick_title));
 
         TextView message = (TextView) dialog.findViewById(R.id.tv_dialog);
         message.setText(getString(R.string.double_confirm_pick_message) + "\n" + order_content);
@@ -272,6 +295,7 @@ public class FinishFragment extends Fragment {
                 Log.d(Constants.LOG_TAG, "cancel order id >> " + order_key);
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
                 plateOrderManager.pickup(order_key, getActivity());
+                ((MainActivity)getActivity()).timerStart();
                 dialog.dismiss();
             }
         });
@@ -279,10 +303,51 @@ public class FinishFragment extends Fragment {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ((MainActivity)getActivity()).timerStart();
                 dialog.dismiss();
             }
         });
 
         dialog.show();
+    }
+
+    private void removeNumberslipAndFreeze(int index) {
+        ((MainActivity)getActivity()).timerStop();
+        disableListedFinishNumberslip(index);
+    }
+
+    private void disableListedFinishNumberslip(int index) {
+        GridView gv = (GridView) v.findViewById(R.id.gv_finish);
+        index -= gv.getFirstVisiblePosition();
+        if (index < 0 || index >= gv.getChildCount()) {
+            Log.d(Constants.LOG_TAG, "Unable to get view for desired position, because it's not being displayed on screen.");
+            return;
+        }
+
+        View v = gv.getChildAt(index);
+        if (v == null) {
+            throw new NullPointerException("child not found in grid view");
+        }
+
+        v.setEnabled(false);
+        v.setClickable(false);
+        //v.setVisibility(View.GONE);
+        //v.setBackgroundColor(Color.RED);
+    }
+
+    private void enableListedFinishNumberslipAll() {
+        GridView gv = (GridView) v.findViewById(R.id.gv_finish);
+        final int size = gv.getChildCount();
+        for (int i=0 ; i<size ; i++){
+            View v = gv.getChildAt(i);
+            if (v == null) {
+                throw new NullPointerException("child not found in grid view");
+            }
+
+            v.setEnabled(true);
+            v.setClickable(true);
+            //v.setVisibility(View.VISIBLE);
+            //v.setBackgroundColor(0xFF000000);
+        }
     }
 }

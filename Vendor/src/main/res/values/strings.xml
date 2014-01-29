@@ -43,10 +43,19 @@
     <string name="popup_set_to_not_busy_message">已經關閉忙碌中狀態</string>
 
     <string name="rest_status_default">載入中…</string>
-    <string name="rest_status_close">關店中</string>
+    <string name="rest_status_close">休息中</string>
     <string name="rest_status_open">營業中</string>
     <string name="rest_status_busy">忙碌中</string>
     <string name="rest_status_error">系統整理中</string>
     <string name="password_input_title">輸入密碼</string>
     <string name="wrong_password_message">密碼錯誤</string>
+    <string name="rest_status_manual">(手動模式)</string>
+    <string name="title_restaurant_status_follow_rule">一般模式</string>
+    <string name="title_restaurant_status_open">手動開店</string>
+    <string name="title_restaurant_status_close">手動關店</string>
+    <string name="select_manual_closed_reason">選擇手動關店原因</string>
+    <string name="closedtoast_reason_post_succeed">設定成功</string>
+    <string name="closedtoast_reason_post_failed">設定失敗</string>
+    <string name="retry">重試</string>
+    <string name="message_network_error">請檢查網路連線</string>
 </resources>

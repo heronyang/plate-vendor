@@ -30,14 +30,6 @@ import retrofit.http.Query;
 
 public class PlateVendorService {
 
-    /*
-    public class Restaurant {
-        public int location;
-        public String name;
-        public int rest_id;
-    }
-    */
-
     public class User {
         public int id;
         public String username;
@@ -82,6 +74,17 @@ public class PlateVendorService {
 
     public class RestStatusResponse {
         public int status;
+        public boolean is_open;
+        public String closed_reason;
+    }
+
+    public class ClosedReasonResponse {
+        public List<ClosedReason> closed_reasons;
+    }
+
+    public class ClosedReason {
+        public String msg;
+        public int id;
     }
 
     interface PlateTWAPI1 {
@@ -109,17 +112,23 @@ public class PlateVendorService {
         void cancel(@Field("order_key") int order_key,
                     Callback<Response> cb);
 
-        @POST("/1/set_busy")
-        void set_busy(Callback<Response> cb);
+        @GET("/1/restaurant_status")
+        void get_restaurant_status(Callback<RestStatusResponse> cb);
 
-        @POST("/1/set_not_busy")
-        void set_not_busy(Callback<Response> cb);
-
-        @GET("/1/get_rest_status")
-        void get_rest_status(Callback<RestStatusResponse> cb);
+        @FormUrlEncoded
+        @POST("/1/restaurant_status")
+        void post_restaurant_status(@Field("status") int status,
+                                    Callback<Response> cb);
 
         @GET("/1/vendor_list")
         void vendor_list(Callback<VendorListResponse> cb);
+
+        @GET("/1/closed_reason")
+        void get_closed_reason(Callback<ClosedReasonResponse> cb);
+
+        @FormUrlEncoded
+        @POST("/1/closed_reason")
+        void post_closed_reason(@Field("closed_reason") int closed_reason_id, Callback<Response> cb);
     }
 
     private static RestAdapter restAdapterV1;

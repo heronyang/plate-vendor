@@ -20,9 +20,32 @@ android {
         minSdkVersion 11
         targetSdkVersion 19
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+
+        myConfig {
+            storeFile file("plate.tw-release-key.keystore")
+            storePassword "plate20140217"
+            keyAlias "plate-dev"
+            keyPassword "plate20140217"
+        }
+    }
+
+    buildTypes {
+        foo {
+            debuggable true
+            jniDebugBuild true
+            signingConfig signingConfigs.myConfig
+        }
+    }
+
+
     buildTypes {
         release {
-            runProguard false
+            runProguard true
             proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
@@ -34,6 +57,7 @@ android {
 }
 
 dependencies {
+    compile 'ch.acra:acra:4.5.0'
     compile 'com.android.support:support-v4:19.0.0'
     compile 'com.android.support:gridlayout-v7:19.0.0'
     compile 'com.android.support:appcompat-v7:+'

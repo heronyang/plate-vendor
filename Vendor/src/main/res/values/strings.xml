@@ -58,4 +58,7 @@
     <string name="closedtoast_reason_post_failed">設定失敗</string>
     <string name="retry">重試</string>
     <string name="message_network_error">請檢查網路連線</string>
+
+
+    <string name="crash_toast_text">Ooooops ! I crashed, but a report can be sent to my developers! They will fix me!</string>
 </resources>

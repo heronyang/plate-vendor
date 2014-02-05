@@ -1,9 +1,13 @@
+/* vim: ts=4:sw=4:smarttab:expandtab
+ */
+
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.7.+'
+
     }
 }
 apply plugin: 'android'
@@ -26,7 +30,7 @@ android {
             storeFile file("debug.keystore")
         }
 
-        myConfig {
+        release {
             storeFile file("plate.tw-release-key.keystore")
             storePassword "plate20140217"
             keyAlias "plate-dev"
@@ -35,18 +39,22 @@ android {
     }
 
     buildTypes {
-        foo {
-            debuggable true
-            jniDebugBuild true
-            signingConfig signingConfigs.myConfig
+        release {
+            debuggable false
+            jniDebugBuild false
+            signingConfig signingConfigs.release
         }
     }
 
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
     buildTypes {
         release {
-            runProguard true
-            proguardFile getDefaultProguardFile('proguard-android.txt')
+            runProguard false
+            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
         }
     }
     productFlavors {

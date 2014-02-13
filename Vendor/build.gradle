@@ -51,11 +51,11 @@ ext {
     versionBuild = t[3]
 }
 
-def getVersionCode() {
+def computeVersionCode() {
     return versionMajor*10000 + versionMinor*1000 + versionPatch*100 + versionBuild
 }
 
-def getVersionName() {
+def computeVersionName() {
     return "${versionMajor}.${versionMinor}.${versionPatch}"
 }
 
@@ -76,6 +76,10 @@ android {
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 19
+        versionCode computeVersionCode()
+        versionName computeVersionName()
+        buildConfigField "String", "GIT_SHA", "\"${gitSha()}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
     }
 
     signingConfigs {
@@ -137,7 +141,7 @@ task commitBumpVersionCode(dependsOn: 'bumpVersionCode') << {
         commandLine 'git', 'commit', '-a', '-m', 'Bump versionCode'
     }
     exec {
-        commandLine 'git', 'tag', "${getVersionName()}.${versionBuild}"
+        commandLine 'git', 'tag', "${computeVersionName()}.${versionBuild}"
     }
 }
 

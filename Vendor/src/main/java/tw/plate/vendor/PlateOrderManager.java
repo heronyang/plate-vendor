@@ -299,6 +299,7 @@ public class PlateOrderManager{
             public void onClick(DialogInterface dialog, int which) {
                 String selectedUsername = vendorList[which];
                 Log.d(Constants.LOG_TAG, "selected >>" + selectedUsername);
+                ((PlateVendor)activity.getApplication()).max_number_slip = 0;
                 loginUsingUsername(selectedUsername, activity);
             }
         });

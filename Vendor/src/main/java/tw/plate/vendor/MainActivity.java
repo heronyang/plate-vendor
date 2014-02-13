@@ -573,7 +573,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     //
     @Override
     public void networkError() {
-
         if (((PlateVendor)getApplication()).networkErrorFreezed) {
             return;
         }

@@ -276,6 +276,20 @@ public class CookingFragment extends Fragment {
         gridviewCustomAdapter = new GridViewCustomAdapter(this.getActivity());
         gv.setAdapter(gridviewCustomAdapter);
 
+        /*
+        //Testing error reporting
+        Button bt = (Button) v.findViewById(R.id.btn_err_trigger);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(Constants.LOG_TAG,"clicked!!");
+                Log.d(Constants.LOG_TAG,"throwing exception!!");
+                throw new RuntimeException("plate-vendor dying on purpose");
+            }
+        });
+        */
+
+
         return v;
     }
 

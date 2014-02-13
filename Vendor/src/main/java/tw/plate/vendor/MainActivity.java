@@ -2,9 +2,8 @@ package tw.plate.vendor;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Dialog;
 import android.content.DialogInterface;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.support.v4.app.FragmentManager;
@@ -24,8 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +34,6 @@ import java.net.CookiePolicy;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Handler;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, PlateOrderManager.PlateOrderManagerCallback {
 
@@ -129,11 +127,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-    private void callPlateOrderManagerLoginAsUsername(String username) {
-        plateOrderManager.loginUsingUsername(username, this);
-    }
-
-
     // ======= UI Stuff ======= END
 
     private void setupCookie() {
@@ -190,7 +183,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     private void refreshData() {
-        Log.d(Constants.LOG_TAG, "Main: refresh");
+        Log.i(Constants.LOG_TAG, "Main: refresh");
         plateOrderManager.update(this);
         plateOrderManager.updateRestStatus(this);
     }
@@ -305,14 +298,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         if (id == R.id.action_settings) {
             simpleVerificationAndSwitchUser();
             return true;
-        } else if (id == R.id.action_set_busy) {
-            plateOrderManager.setBusy(this);
+        } else if (id == R.id.action_set_follow_rule) {
+            plateOrderManager.post_restaurant_status(Constants.Status.RESTAURANT_STATUS_FOLLOW_OPEN_RULES.ordinal(), this);
             return true;
-        } else if (id == R.id.action_set_not_busy) {
-            plateOrderManager.setNotBusy(this);
+        } else if (id == R.id.action_set_open) {
+            plateOrderManager.post_restaurant_status(Constants.Status.RESTAURANT_STATUS_MANUAL_OPEN.ordinal(), this);
+            return true;
+        } else if (id == R.id.action_set_close) {
+            plateOrderManager.post_restaurant_status(Constants.Status.RESTAURANT_STATUS_MANUAL_CLOSE.ordinal(), this);
             return true;
         } else if (id == R.id.action_rest_status) {
-
             return true;
         }
 
@@ -459,35 +454,83 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     public void loginCompleted() {
         Log.d(Constants.LOG_TAG, "login completed");
+        plateOrderManager.getClosedReason(this);
         plateOrderManager.update(this);
     }
 
     @Override
     public void statusUpdate() {
         Constants.Status status = plateOrderManager.status;
+        boolean is_open = plateOrderManager.is_open;
+
         MenuItem statusItem = menu.findItem(R.id.action_rest_status);
         if (statusItem == null) return;
         switch (status) {
-            case RESTAURANT_STATUS_CLOSE:
-                Log.d(Constants.LOG_TAG, "restaurant close");
-                statusItem.setTitle(getString(R.string.rest_status_close));
+            case RESTAURANT_STATUS_FOLLOW_OPEN_RULES:
+                Log.i(Constants.LOG_TAG, "restaurant follow open rules");
+                if (is_open) {
+                    statusItem.setTitle(getString(R.string.rest_status_open));
+                    statusItem.setIcon(getResources().getDrawable(R.drawable.circle_green));
+                } else {
+                    statusItem.setTitle(getString(R.string.rest_status_close));
+                    statusItem.setIcon(getResources().getDrawable(R.drawable.circle_red));
+                }
+                break;
+            case RESTAURANT_STATUS_MANUAL_CLOSE:
+                Log.i(Constants.LOG_TAG, "restaurant close");
+                statusItem.setTitle(getString(R.string.rest_status_close) + getString(R.string.rest_status_manual));
                 statusItem.setIcon(getResources().getDrawable(R.drawable.circle_red));
                 break;
-            case RESTAURANT_STATUS_OPEN:
-                Log.d(Constants.LOG_TAG, "restaurant open");
+            case RESTAURANT_STATUS_MANUAL_OPEN:
+                Log.i(Constants.LOG_TAG, "restaurant open");
+                statusItem.setTitle(getString(R.string.rest_status_open) + getString(R.string.rest_status_manual));
                 statusItem.setIcon(getResources().getDrawable(R.drawable.circle_green));
-                statusItem.setTitle(getString(R.string.rest_status_open));
-                break;
-            case RESTAURANT_STATUS_BUSY:
-                Log.d(Constants.LOG_TAG, "restaurant busy");
-                statusItem.setIcon(getResources().getDrawable(R.drawable.circle_yellow));
-                statusItem.setTitle(getString(R.string.rest_status_busy));
                 break;
             default:
-                Log.d(Constants.LOG_TAG, "know status");
+                Log.i(Constants.LOG_TAG, "know status");
                 statusItem.setTitle(getString(R.string.rest_status_error));
+                statusItem.setIcon(getResources().getDrawable(R.drawable.circle_yellow));
                 break;
         }
+    }
+
+    @Override
+    public void statusPostCompleted(boolean selectClosedReason) {
+        if (selectClosedReason) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.select_manual_closed_reason));
+
+            final List<ClosedReason> closedReasons = ((PlateVendor)getApplication()).closedReasons;
+            String crList [] = new String[closedReasons.size()];
+            for (int i=0 ; i<closedReasons.size() ; i++) {
+                crList[i] = closedReasons.get(i).msg;
+            }
+            builder.setItems(crList, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    int id = closedReasons.get(which).id;
+                    Log.d(Constants.LOG_TAG, "closed reason id >> " + id);
+                    callPostClosedReason(id);
+                }
+            });
+            builder.show();
+
+        }
+    }
+
+    @Override
+    public void closedReasonPostSucceed() {
+        Toast.makeText(this, getString(R.string.closedtoast_reason_post_succeed), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void closedReasonPostFailed() {
+        Toast.makeText(this, getString(R.string.closedtoast_reason_post_failed), Toast.LENGTH_LONG).show();
+    }
+
+    private void callPostClosedReason(int id) {
+        plateOrderManager.postClosedReason(id, this);
     }
 
     //
@@ -524,6 +567,39 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         mediaPlayer.release();
         mediaPlayer = null;
         super.onDestroy();
+    }
+
+
+    //
+    @Override
+    public void networkError() {
+
+        if (((PlateVendor)getApplication()).networkErrorFreezed) {
+            return;
+        }
+
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_network_error);
+        dialog.setCanceledOnTouchOutside(false);
+
+        TextView message = (TextView) dialog.findViewById(R.id.tv_dialog_network_error);
+        message.setText(getString(R.string.message_network_error));
+
+        timerStop();
+
+        ((PlateVendor)getApplication()).networkErrorFreezed = true;
+
+        Button retryButton = (Button) dialog.findViewById(R.id.btn_dialog_retry);
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(Constants.LOG_TAG, "network error" );
+                ((PlateVendor)getApplication()).networkErrorFreezed = false;
+                timerStart();
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
     //================================================================================

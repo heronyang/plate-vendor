@@ -2,16 +2,11 @@ package tw.plate.vendor;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import java.net.ContentHandler;
-import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.util.List;
-import java.util.concurrent.locks.LockSupport;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -23,8 +18,13 @@ import retrofit.client.Response;
 public class PlateOrderManager{
 
     String password, username;
-    Constants.Status status = Constants.Status.RESTAURANT_STATUS_CLOSE; // default
 
+    //
+    Constants.Status status = Constants.Status.RESTAURANT_STATUS_FOLLOW_OPEN_RULES; // default
+    boolean is_open = false;
+    String closed_reason = "";
+
+    //
     PlateVendorService.PlateTWAPI1 plateTWV1;
     List<PlateVendorService.OrderSingle> orders;
 
@@ -35,6 +35,12 @@ public class PlateOrderManager{
         void orderUpdated();
         void loginCompleted();
         void statusUpdate();
+        void statusPostCompleted(boolean selectClosedReason);
+
+        void closedReasonPostSucceed();
+        void closedReasonPostFailed();
+
+        void networkError();
     }
     private PlateOrderManagerCallback callerActivity;
 
@@ -46,19 +52,16 @@ public class PlateOrderManager{
             @Override
             public void success(PlateVendorService.OrderVendorResponse r, Response response) {
                 orders = r.orders;
-                Log.d(Constants.LOG_TAG, "Update: Success");
+                Log.i(Constants.LOG_TAG, "Update: Success");
                 callerActivity.orderUpdated();
             }
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 // redirect to login page
                 Log.d(Constants.LOG_TAG, "Update: Error : " + error.getMessage());
             }
         });
-    }
-
-    public boolean isEmpty() {
-        return orders.isEmpty();
     }
 
     public void login(Activity activity) {
@@ -72,6 +75,7 @@ public class PlateOrderManager{
                 callerActivity.loginCompleted();
             }
             @Override public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 // select login vendor
                 Log.d(Constants.LOG_TAG, "Login: Error : " + error.getMessage());
             }
@@ -103,14 +107,13 @@ public class PlateOrderManager{
         return (sp.contains(Constants.SP_TAG_PASSWORD) && sp.contains((Constants.SP_TAG_USERNAME)));
     }
 
-    //private static PlateOrderManager instance;
-
     public PlateOrderManager(Activity _mContext) {
         mContext = _mContext;
         accountSetup();
     }
 
 
+    /* POST ORDER STATUS */
     public void finish(int order_key, final Activity activity) {
         plateTWV1.finish(order_key, new Callback<Response>() {
             @Override
@@ -120,6 +123,7 @@ public class PlateOrderManager{
 
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 Log.d(Constants.LOG_TAG, "Finish: Error : " + error.getMessage());
                 String title = activity.getString(R.string.popup_network_error_title);
                 String message = activity.getString(R.string.popup_network_error_message);
@@ -137,6 +141,7 @@ public class PlateOrderManager{
 
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 Log.d(Constants.LOG_TAG, "Cancel: Error : " + error.getMessage());
                 String title = activity.getString(R.string.popup_network_error_title);
                 String message = activity.getString(R.string.popup_network_error_message);
@@ -154,6 +159,7 @@ public class PlateOrderManager{
 
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 Log.d(Constants.LOG_TAG, "Finish: Error : " + error.getMessage());
                 String title = activity.getString(R.string.popup_network_error_title);
                 String message = activity.getString(R.string.popup_network_error_message);
@@ -162,8 +168,7 @@ public class PlateOrderManager{
         });
     }
 
-    // ======= UI Stuff =======
-
+    /* UI Stuff */
     private void popupMessage(String title, String message, Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(message)
@@ -172,14 +177,13 @@ public class PlateOrderManager{
             public void onClick(DialogInterface dialog, int id) {
             }
         });
-
         AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }
 
     public void switchUser(final Activity activity) {
         plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
-
         plateTWV1.vendor_list(new Callback<PlateVendorService.VendorListResponse>() {
             @Override
             public void success(PlateVendorService.VendorListResponse r, Response response) {
@@ -190,66 +194,94 @@ public class PlateOrderManager{
 
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 // select login vendor
                 Log.d(Constants.LOG_TAG, "VendorList: Error : " + error.getMessage());
             }
         });
     }
 
-    public void setBusy(final Activity activity) {
+    /* Vendor Status */
+    public void post_restaurant_status(final int status, final Activity activity) {
+        callerActivity = (PlateOrderManagerCallback)activity;
+
         plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
-        plateTWV1.set_busy(new Callback<Response>() {
+        plateTWV1.post_restaurant_status(status, new Callback<Response>() {
             @Override
-            public void success(Response response, Response response2) {
-                String title = activity.getString(R.string.popup_set_title);
-                String message = activity.getString(R.string.popup_set_to_busy_message);
-                popupMessage(title, message, activity);
+            public void success(Response r, Response response) {
+                Log.d(Constants.LOG_TAG, "Post Status: Success!");
+                boolean selectCosedReason = status == Constants.Status.RESTAURANT_STATUS_MANUAL_CLOSE.ordinal();
+                callerActivity.statusPostCompleted(selectCosedReason);
             }
 
             @Override
             public void failure(RetrofitError error) {
-                String title = activity.getString(R.string.popup_network_error_title);
-                String message = activity.getString(R.string.popup_network_error_message);
-                popupMessage(title, message, activity);
+                if (error.isNetworkError()) callerActivity.networkError();
+                Log.d(Constants.LOG_TAG, "Post Status: Error : " + error.getMessage());
             }
         });
-
-    }
-
-    public void setNotBusy(final Activity activity) {
-        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
-        plateTWV1.set_not_busy(new Callback<Response>() {
-            @Override
-            public void success(Response response, Response response2) {
-                String title = activity.getString(R.string.popup_set_title);
-                String message = activity.getString(R.string.popup_set_to_not_busy_message);
-                popupMessage(title, message, activity);
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                String title = activity.getString(R.string.popup_network_error_title);
-                String message = activity.getString(R.string.popup_network_error_message);
-                popupMessage(title, message, activity);
-            }
-        });
-
     }
 
     public void updateRestStatus(final Activity activity) {
         plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
-        plateTWV1.get_rest_status(new Callback<PlateVendorService.RestStatusResponse>() {
+        plateTWV1.get_restaurant_status(new Callback<PlateVendorService.RestStatusResponse>() {
             @Override
             public void success(PlateVendorService.RestStatusResponse restStatusResponse, Response response) {
-                Log.d(Constants.LOG_TAG, "status >> " + restStatusResponse.status);
+                Log.i(Constants.LOG_TAG, "status >> " + restStatusResponse.status);
+
                 status = Constants.Status.values()[restStatusResponse.status];
+                is_open = restStatusResponse.is_open;
+                closed_reason = restStatusResponse.closed_reason;
+
                 callerActivity = (PlateOrderManagerCallback)activity;
                 callerActivity.statusUpdate();
             }
 
             @Override
             public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
                 Log.d(Constants.LOG_TAG, "status update failed");
+            }
+        });
+    }
+
+    /* Closed Reasons */
+    public void getClosedReason(final Activity activity) {
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+        plateTWV1.get_closed_reason(new Callback<PlateVendorService.ClosedReasonResponse>() {
+            @Override
+            public void success(PlateVendorService.ClosedReasonResponse closedReasonResponse, Response response) {
+                List<ClosedReason> closedReasonsApp = ((PlateVendor)activity.getApplication()).closedReasons;
+                closedReasonsApp.clear();
+                for (PlateVendorService.ClosedReason closedReasonGet : closedReasonResponse.closed_reasons) {
+                    ClosedReason cr = new ClosedReason(closedReasonGet.msg, closedReasonGet.id);
+                    closedReasonsApp.add(cr);
+                    Log.i(Constants.LOG_TAG, cr.msg);
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
+                Log.i(Constants.LOG_TAG, "get closed reason failed");
+            }
+        });
+    }
+
+    public void postClosedReason(int closed_reason_id, final Activity activity) {
+        callerActivity = (PlateOrderManagerCallback)activity;
+        plateTWV1 = PlateVendorService.getAPI1(Constants.API_URI_PREFIX);
+        plateTWV1.post_closed_reason(closed_reason_id, new Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                callerActivity.closedReasonPostSucceed();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                if (error.isNetworkError()) callerActivity.networkError();
+                Log.d(Constants.LOG_TAG, "post closed reason failed" + error.getMessage());
+                callerActivity.closedReasonPostFailed();
             }
         });
 

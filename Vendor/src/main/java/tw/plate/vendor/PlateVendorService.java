@@ -143,8 +143,10 @@ public class PlateVendorService {
 			 * http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
 			 * */
             String fmt;
+            //FIXME: server : "yyyy-MM-dd'T'HH:mmZ", local : "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ";
             if (System.getProperty("java.runtime.name").equals("Android Runtime")) {
                 fmt = "yyyy-MM-dd'T'HH:mmZ";
+                //fmt = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ";
             } else {
                 fmt = "yyyy-MM-dd'T'HH:mmZ";
             }

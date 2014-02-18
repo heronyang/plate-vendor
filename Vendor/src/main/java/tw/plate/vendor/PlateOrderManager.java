@@ -88,7 +88,7 @@ public class PlateOrderManager{
         if (!accountInSharedPreferences()){
             // get username/password
             // NOTE: should popup a selection UI
-            username = "v1";
+            username = Constants.USERNAME;
             password = Constants.VENDOR_PASSWORD;
 
             // save back
@@ -110,6 +110,7 @@ public class PlateOrderManager{
     public PlateOrderManager(Activity _mContext) {
         mContext = _mContext;
         accountSetup();
+        username = Constants.USERNAME;
     }
 
 

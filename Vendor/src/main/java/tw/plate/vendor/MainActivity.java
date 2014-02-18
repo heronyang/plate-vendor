@@ -172,6 +172,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     public void timerStart() {
+        refreshData();
         timer = new Timer();
         timerTask = new TimerTask() {
             @Override

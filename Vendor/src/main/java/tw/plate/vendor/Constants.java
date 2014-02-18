@@ -4,6 +4,7 @@ package tw.plate.vendor;
  * Created by heron on 12/14/13.
  */
 final public class Constants {
+
     // SERVER URI
     //public static final String API_URI_PREFIX = "http://10.0.2.2:8080"; // Developing Mode (Emulator)
     //public static final String API_URI_PREFIX = "http://192.168.0.121:8080"; // Heron's Local Developing Mode
@@ -22,6 +23,7 @@ final public class Constants {
     public static final String SP_TAG_USERNAME = "VENDOR_USERNAME";
 
     // password for vendor
+    public static final String USERNAME = "v1";
     public static final String VENDOR_PASSWORD = "platerocks";
     public static final String SWITCH_USER_PASSWORD = "etalp";
 
@@ -45,5 +47,5 @@ final public class Constants {
     }
 
 
-    public static int REFRESH_INT = 1000;
+    public static int REFRESH_INT = 500;
 }

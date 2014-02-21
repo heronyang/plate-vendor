@@ -145,8 +145,11 @@ public class PlateVendorService {
             String fmt;
             //FIXME: server : "yyyy-MM-dd'T'HH:mmZ", local : "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ";
             if (System.getProperty("java.runtime.name").equals("Android Runtime")) {
-                fmt = "yyyy-MM-dd'T'HH:mmZ";
-                //fmt = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ";
+                if (Constants.DEBUG_MODE) {
+                    fmt = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ";
+                } else {
+                    fmt = "yyyy-MM-dd'T'HH:mmZ";
+                }
             } else {
                 fmt = "yyyy-MM-dd'T'HH:mmZ";
             }

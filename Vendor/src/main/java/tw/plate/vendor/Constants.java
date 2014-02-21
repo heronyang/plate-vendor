@@ -1,9 +1,14 @@
 package tw.plate.vendor;
 
+import android.support.v7.appcompat.*;
+import android.support.v7.appcompat.R;
+
 /**
  * Created by heron on 12/14/13.
  */
 final public class Constants {
+
+    public static final boolean DEBUG_MODE = false;
 
     // SERVER URI
     //public static final String API_URI_PREFIX = "http://10.0.2.2:8080"; // Developing Mode (Emulator)
@@ -12,7 +17,7 @@ final public class Constants {
     //public static final String API_URI_PREFIX = "http://192.168.0.192:8080"; // Heron's Local Developing Mode
     //public static final String API_URI_PREFIX = "http://106.187.89.91:8080"; // Heron's Local Developing Mode
     //public static final String API_URI_PREFIX = "http://api-dev.plate.tw:8080"; // Heron's Local Developing Mode
-    public static final String API_URI_PREFIX = "https://api.plate.tw"; // Release Mode
+    public static final String API_URI_PREFIX = DEBUG_MODE?"http://192.168.1.228:8080":"https://api.plate.tw"; // Release Mode
 
     //
     public static final String LOG_TAG = "PlateVendorLog";
@@ -47,5 +52,5 @@ final public class Constants {
     }
 
 
-    public static int REFRESH_INT = 500;
+    public static int REFRESH_INT = 1000;
 }

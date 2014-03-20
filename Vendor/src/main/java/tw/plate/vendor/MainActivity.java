@@ -172,6 +172,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     public void timerStart() {
+        refreshData();
         timer = new Timer();
         timerTask = new TimerTask() {
             @Override
@@ -573,7 +574,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     //
     @Override
     public void networkError() {
-
         if (((PlateVendor)getApplication()).networkErrorFreezed) {
             return;
         }

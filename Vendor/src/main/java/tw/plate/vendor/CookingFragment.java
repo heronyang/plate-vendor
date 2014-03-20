@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,6 +40,7 @@ public class CookingFragment extends Fragment {
     Tool tool;
 
     boolean inFreezeMode = false;
+    List<Integer> checkList = null;
 
     //================================================================================
     // Adapters
@@ -51,6 +54,7 @@ public class CookingFragment extends Fragment {
             TextView tv_phone;
             TextView tv_totalPrice;
             TextView tv_datetime;
+            CheckBox extra_tick;
 
             Button cancel_order_button;
             Button finish_order_button;
@@ -90,6 +94,7 @@ public class CookingFragment extends Fragment {
                 viewHolder.tv_phone = (TextView) convertview.findViewById(R.id.tv_phone);
                 viewHolder.tv_totalPrice = (TextView) convertview.findViewById(R.id.tv_total_price);
                 viewHolder.tv_datetime = (TextView) convertview.findViewById(R.id.tv_datetime);
+                viewHolder.extra_tick = (CheckBox) convertview.findViewById(R.id.extra_checkbox);
 
                 viewHolder.cancel_order_button = (Button) convertview.findViewById(R.id.cancel_order_button);
                 viewHolder.finish_order_button = (Button) convertview.findViewById(R.id.finish_order_button);
@@ -104,7 +109,7 @@ public class CookingFragment extends Fragment {
             PlateVendorService.OrderV1 o = orders_cooking.get(arg0).order;
             //output += ("time : " + o.mtime + "\n");
             //output += ("ph : " + orders_cooking.get(arg0).user.username + "\n");
-            Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
+            /*Button bt_cancel = (Button)convertview.findViewById(R.id.cancel_order_button);
             Button bt_finish = (Button)convertview.findViewById(R.id.finish_order_button);
 
             bt_cancel.setOnClickListener(new View.OnClickListener() {
@@ -128,7 +133,28 @@ public class CookingFragment extends Fragment {
                     doubleConfirmFinish(order_key, getActivity());
                 }
             });
+            */
+            viewHolder.cancel_order_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // disable this listrow
+                    removeListRowAndFreeze(arg0);
+                    // finishOrder
+                    int order_key = orders_cooking.get(arg0).order.id;
+                    doubleConfirmCancel(order_key, getActivity(),arg0);
+                }
+            });
 
+            viewHolder.finish_order_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // disable this listrow
+                    removeListRowAndFreeze(arg0);
+                    // finishOrder
+                    int order_key = orders_cooking.get(arg0).order.id;
+                    doubleConfirmFinish(order_key, getActivity(),arg0);
+                }
+            });
 
             List<PlateVendorService.OrderItemV1> order_items = orders_cooking.get(arg0).order_items;
             int totalPrice = 0;
@@ -141,7 +167,6 @@ public class CookingFragment extends Fragment {
             viewHolder.tv_totalPrice.setText(totalPrice+" 元");
             viewHolder.tv_slip_number.setText(tool.formattedNS(o.pos_slip_number)+"");
             viewHolder.tv_listrow_cooking.setText(output);
-
 
             DateFormat df = new SimpleDateFormat("HH:mm:ss");
             Date ctime = orders_cooking.get(arg0).order.ctime;
@@ -156,6 +181,25 @@ public class CookingFragment extends Fragment {
             SpannableString spanStringPhone = new SpannableString(formatPhoneNumber(phoneNumber));
             spanStringPhone.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanStringPhone.length(), 0);
             viewHolder.tv_phone.setText(spanStringPhone);
+
+            viewHolder.extra_tick.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b == true){
+                        checkList.set(arg0,1);
+                    } else{
+                        checkList.set(arg0,0);
+                    }
+                }
+            });
+
+            if(checkList.get(arg0) == 1){
+                //Log.d(Constants.LOG_TAG, "set checkbox arg0: "+arg0+" 1st visible: "+lv.getFirstVisiblePosition()+" pos: "+pos);
+                Log.d(Constants.LOG_TAG, "set checkbox arg0: "+arg0);
+                viewHolder.extra_tick.setChecked(true);
+            } else{
+                viewHolder.extra_tick.setChecked(false);
+            }
 
             /*
             viewHolder.cancel_order_button.setEnabled(false);
@@ -230,13 +274,25 @@ public class CookingFragment extends Fragment {
         Log.d(Constants.LOG_TAG, "Cooking: cooking list update start");
         PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
         orders = plateOrderManager.orders;
-
         orders_cooking = new ArrayList<PlateVendorService.OrderSingle>();
         for (PlateVendorService.OrderSingle os : orders) {
             if (os.order.status == Constants.ORDER_STATE.ORDER_STATUS_INIT_COOKING.ordinal()) {
                 orders_cooking.add(os);
             }
         }
+
+        if(checkList==null){
+            checkList= new ArrayList<Integer>();
+            for(int i=0; i<orders_cooking.size();i++){
+                checkList.add(0);
+            }
+        } else{
+            int diff = orders_cooking.size() - checkList.size();
+            for(int i=0; i<diff; i++){
+                checkList.add(0);
+            }
+        }
+
         if (!inFreezeMode) {
             listViewUpdate();
             gridViewUpdate();
@@ -276,20 +332,6 @@ public class CookingFragment extends Fragment {
         gridviewCustomAdapter = new GridViewCustomAdapter(this.getActivity());
         gv.setAdapter(gridviewCustomAdapter);
 
-        /*
-        //Testing error reporting
-        Button bt = (Button) v.findViewById(R.id.btn_err_trigger);
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(Constants.LOG_TAG,"clicked!!");
-                Log.d(Constants.LOG_TAG,"throwing exception!!");
-                throw new RuntimeException("plate-vendor dying on purpose");
-            }
-        });
-        */
-
-
         return v;
     }
 
@@ -323,7 +365,7 @@ public class CookingFragment extends Fragment {
     //================================================================================
     // Tool Function
     //================================================================================
-    private void doubleConfirmFinish(final int order_key, Activity activity) {
+    private void doubleConfirmFinish(final int order_key, Activity activity, final int index) {
         final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_custom);
         dialog.setCanceledOnTouchOutside(false);
@@ -340,6 +382,7 @@ public class CookingFragment extends Fragment {
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
                 plateOrderManager.finish(order_key, getActivity());
                 ((MainActivity)getActivity()).timerStart();
+                checkList.remove(index);
                 inFreezeMode = false;
                 dialog.dismiss();
             }
@@ -357,7 +400,7 @@ public class CookingFragment extends Fragment {
         dialog.show();
     }
 
-    private void doubleConfirmCancel(final int order_key, Activity activity) {
+    private void doubleConfirmCancel(final int order_key, Activity activity, final int index) {
         final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_custom);
         dialog.setCanceledOnTouchOutside(false);
@@ -374,6 +417,7 @@ public class CookingFragment extends Fragment {
                 PlateOrderManager plateOrderManager = MainActivity.plateOrderManager;
                 plateOrderManager.cancel(order_key, getActivity());
                 ((MainActivity)getActivity()).timerStart();
+                checkList.remove(index);
                 inFreezeMode = false;
                 dialog.dismiss();
             }
@@ -392,6 +436,8 @@ public class CookingFragment extends Fragment {
     }
 
     /* Tool for UI */
+
+
     private void removeListRowAndFreeze(int index) {
         inFreezeMode = true;
         ((MainActivity)getActivity()).timerStop();
@@ -414,6 +460,7 @@ public class CookingFragment extends Fragment {
         }
         listRow.setEnabled(false);  // FIXME: not working for customAdapter, use visible = GONE instead
         listRow.setVisibility(View.GONE);
+
     }
 
     private void enableOrderListRowAll(){

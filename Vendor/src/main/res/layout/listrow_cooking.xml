@@ -24,6 +24,7 @@
             android:paddingBottom="50dp"
             android:scaleX="3.0"
             android:scaleY="3.0"
+            android:checked="false"
             />
 
         <TextView

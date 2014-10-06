@@ -1,5 +1,7 @@
 package tw.plate.vendor;
 
+import android.util.Log;
+
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -160,7 +162,9 @@ public class PlateVendorService {
                 throws JsonParseException {
             try {
                 String s = json.getAsJsonPrimitive().getAsString();
+                Log.d(Constants.LOG_TAG, "date (s)>>>" + s);
                 String dateWithoutMicros = s.substring(0, s.length() - 9) + s.substring(s.length() - 6);
+                Log.d(Constants.LOG_TAG, "date>>>" + dateWithoutMicros);
                 return sdf.parse(dateWithoutMicros);
             } catch (ParseException e) {
                 throw new JsonParseException(e.getMessage());
